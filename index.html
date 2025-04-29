@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Socket.IO chat</title>
+    <style>
+        body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+        #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+        #input:focus { outline: none; }
+        #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages > li { padding: 0.5rem 1rem; }
+        #messages > li:nth-child(odd) { background: #efefef; }
+    </style>
+</head>
+<body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        // const socket = io();
+        const socket = io('http://localhost:3000', {
+            withCredentials: true
+        });
+
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+
+        // Function to handle initial connection or reconnection
+        function connectUser() {
+            // Check if we have a stored session
+            const storedSession = localStorage.getItem('chatSessionId');
+            const storedUsername = localStorage.getItem('chatUsername');
+            
+            // If it's a new user, ask for username
+            const username = storedUsername || prompt("Enter your name:");
+            
+            // Store username for future use
+            if (!storedUsername) {
+                localStorage.setItem('chatUsername', username);
+            }
+            
+            // Join with session data if available
+            socket.emit('join', { 
+                username: username,
+                sessionId: storedSession || null
+            });
+        }
+
+        // Connect on page load
+        connectUser();
+
+        // Handle session creation/reconnection confirmation
+        socket.on('sessionCreated', (data) => {
+            // Store the session ID
+            localStorage.setItem('chatSessionId', data.sessionId);
+            
+            // If reconnected, show a local message
+            if (data.reconnected) {
+                const item = document.createElement('li');
+                item.textContent = `Reconnected to chat as ${data.username}`;
+                item.style.fontStyle = 'italic';
+                item.style.color = '#008800';
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+
+        // Handle connection errors and reconnection
+        socket.on('disconnect', () => {
+            const item = document.createElement('li');
+            item.textContent = 'Disconnected from server. Attempting to reconnect...';
+            item.style.fontStyle = 'italic';
+            item.style.color = '#ff0000';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.io.on('reconnect', () => {
+            const item = document.createElement('li');
+            item.textContent = 'Reconnected to server!';
+            item.style.fontStyle = 'italic';
+            item.style.color = '#008800';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+            
+            // Reestablish the session
+            connectUser();
+        });
+
+        // Kirim pesan saat form disubmit
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value.trim()) {
+                socket.emit('message', { message: input.value });
+                input.value = '';
+            }
+        });
+
+        // Menangani pesan masuk dari server
+        socket.on('message', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.username}: ${data.message}`;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Menangani notifikasi user join
+        socket.on('userJoined', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.message}`;
+            item.style.fontStyle = 'italic';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Menangani notifikasi user reconnected
+        socket.on('userReconnected', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.message}`;
+            item.style.fontStyle = 'italic';
+            item.style.color = '#008800';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Menangani notifikasi user temporari disconnect
+        socket.on('userDisconnected', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.message}`;
+            item.style.fontStyle = 'italic';
+            item.style.color = '#ff9900';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Menangani notifikasi user left
+        socket.on('userLeft', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.message}`;
+            item.style.fontStyle = 'italic';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+    
+</body>
+</html>
