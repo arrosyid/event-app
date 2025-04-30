@@ -54,11 +54,12 @@ class AuthService {
         try {
             logger.info(`Login attempt for email: ${email}`);
 
+            // Find user only if active and not soft-deleted
             const user = await prisma.user.findUnique({
-                where: { email: email },
+                where: { email: email, deletedAt: null }, // Add deletedAt check
             });
 
-            if (!user || !user.password_salt) { // Check for user and salt
+            if (!user || !user.password_salt) { // Check for user and salt (user check now implicitly checks deletedAt)
                 logger.warn(`Login failed: User not found or missing salt for email ${email}`);
                 return { success: false, status: 401, message: 'Invalid email or password' };
             }
@@ -115,8 +116,9 @@ class AuthService {
         try {
             logger.info(`Registration attempt for email: ${email}`);
 
+            // Check if email exists for an *active* user
             const existingUser = await prisma.user.findUnique({
-                where: { email: email },
+                where: { email: email, deletedAt: null }, // Add deletedAt check
             });
 
             if (existingUser) {

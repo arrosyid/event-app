@@ -38,7 +38,7 @@ class UserService {
      */
     async getUsers(requestingUserId, requestingUserRole) {
         try {
-            // Select fields excluding password and salt
+            // Select fields excluding password, salt, and deletedAt (unless needed for admin view)
             const selectFields = { id: true, name: true, email: true, role: true, is_active: true, avatar: true, created_at: true, updated_at: true };
 
             if (requestingUserRole.toLowerCase() === 'admin') {
@@ -50,19 +50,24 @@ class UserService {
                     return { success: true, data: JSON.parse(cachedUsers) };
                 }
 
-                logger.info('Cache miss for all users. Fetching from DB.');
-                const users = await prisma.user.findMany({ select: selectFields });
+                logger.info('Cache miss for all active users. Fetching from DB.');
+                // Fetch only active users
+                const users = await prisma.user.findMany({
+                    where: { deletedAt: null }, // Filter out soft-deleted users
+                    select: selectFields
+                });
                 await setAsync(ALL_USERS_CACHE_KEY, USER_CACHE_TTL, JSON.stringify(users));
                 return { success: true, data: users };
 
             } else {
+                // Fetch user only if not soft-deleted
                 const user = await prisma.user.findUnique({
-                    where: { id: requestingUserId },
+                    where: { id: requestingUserId, deletedAt: null }, // Check for soft delete
                     select: selectFields
                 });
                 if (!user) {
-                    logger.warn(`User not found with ID: ${requestingUserId}`);
-                    return { success: false, status: 404, message: 'User not found' };
+                    logger.warn(`Active user not found with ID: ${requestingUserId}`);
+                    return { success: false, status: 404, message: 'User not found or has been deleted' };
                 }
                 return { success: true, data: user };
             }
@@ -82,14 +87,16 @@ class UserService {
     async updateUser(userId, updateData, avatarFilename) {
         const { name, email, password } = updateData;
         try {
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            // Find user only if not soft-deleted
+            const user = await prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
             if (!user) {
-                logger.warn(`User update failed: User not found with ID ${userId}`);
-                return { success: false, status: 404, message: 'User not found' };
+                logger.warn(`User update failed: Active user not found with ID ${userId}`);
+                return { success: false, status: 404, message: 'User not found or has been deleted' };
             }
 
+            // Check for email conflict among *active* users only
             if (email && email !== user.email) {
-                const existingEmail = await prisma.user.findUnique({ where: { email } });
+                const existingEmail = await prisma.user.findUnique({ where: { email, deletedAt: null } });
                 if (existingEmail) {
                     logger.warn(`User update failed: Email ${email} already exists for another user.`);
                     return { success: false, status: 400, message: 'Email already exists' };
@@ -112,10 +119,11 @@ class UserService {
             // Add updated_at timestamp
             dataToUpdate.updated_at = new Date();
 
+            // Update only if not soft-deleted
             const updatedUser = await prisma.user.update({
-                where: { id: userId },
+                where: { id: userId, deletedAt: null },
                 data: dataToUpdate,
-                // Select fields excluding password and salt
+                // Select fields excluding password, salt, and deletedAt
                 select: { id: true, name: true, email: true, role: true, is_active: true, avatar: true, created_at: true, updated_at: true }
             });
 
@@ -142,13 +150,19 @@ class UserService {
      */
     async changeUserRole(userId, role) {
         try {
+            // Check if user exists and is active before changing role
+            const user = await prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
+            if (!user) {
+                logger.warn(`Change role failed: Active user not found with ID ${userId}`);
+                return { success: false, status: 404, message: 'User not found or has been deleted' };
+            }
 
             await prisma.user.update({
-                where: { id: userId },
-                data: { role: role.toLowerCase() }
+                where: { id: userId, deletedAt: null }, // Ensure we only update active user
+                data: { role: role.toLowerCase(), updated_at: new Date() } // Also update timestamp
             });
 
-            logger.info(`User role changed successfully: ${userId} to ${role}`);
+            logger.info(`Active user role changed successfully: ${userId} to ${role}`);
             // Invalidate caches
             const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
             await delAsync(ALL_USERS_CACHE_KEY);
@@ -169,18 +183,20 @@ class UserService {
      */
     async activateUser(userId) {
         try {
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            // Check if user exists and is active before activating (though activating an active user is idempotent)
+            const user = await prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
             if (!user) {
-                logger.warn(`User activation failed: User not found with ID ${userId}`);
-                return { success: false, status: 404, message: 'User not found' };
+                logger.warn(`User activation failed: Active user not found with ID ${userId}`);
+                return { success: false, status: 404, message: 'User not found or has been deleted' };
             }
 
+            // Update only if not soft-deleted
             await prisma.user.update({
-                where: { id: userId },
-                data: { is_active: true, updated_at: new Date() }, // Also update timestamp
+                where: { id: userId, deletedAt: null },
+                data: { is_active: true, updated_at: new Date() },
             });
 
-            logger.info(`User activated successfully: ${userId}`);
+            logger.info(`Active user activated successfully: ${userId}`);
             // Invalidate caches
             const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
             await delAsync(ALL_USERS_CACHE_KEY);
@@ -199,32 +215,32 @@ class UserService {
      * @param {number} userId - The ID of the user to delete.
      * @returns {Promise<object>} - Contains success status and message.
      */
-    async deleteUser(userId) {
+    async deleteUser(userId) { // Now implements soft delete
         try {
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            // Check if user exists and is not already soft-deleted
+            const user = await prisma.user.findUnique({ where: { id: userId, deletedAt: null } });
             if (!user) {
-                logger.warn(`User deletion failed: User not found with ID ${userId}`);
-                return { success: false, status: 404, message: 'User not found' };
+                logger.warn(`User deletion failed: Active user not found with ID ${userId}`);
+                return { success: false, status: 404, message: 'User not found or already deleted' };
             }
 
-            await prisma.user.delete({
-                where: { id: userId },
+            // Soft delete the user
+            await prisma.user.update({
+                where: { id: userId }, // Already checked that deletedAt is null above
+                data: { deletedAt: new Date(), is_active: false }, // Also mark as inactive
             });
 
-            logger.info(`User deleted successfully: ${userId}`);
+            logger.info(`User soft-deleted successfully: ${userId}`);
             // Invalidate caches
             const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
             await delAsync(ALL_USERS_CACHE_KEY);
-            await delAsync(`user:${userId}`);
+            await delAsync(`user:${userId}`); // Invalidate specific user cache if exists
 
             return { success: true, message: 'User deleted successfully' };
 
         } catch (error) {
-            if (error.code === 'P2003') {
-                logger.error('Error deleting user: Foreign key constraint failed.', { error: error.message, userId: userId });
-                return { success: false, status: 400, message: 'Cannot delete user: User is associated with other data.' };
-            }
-            logger.error('Error deleting user:', { error: error.message, userId: userId });
+            // P2003 (Foreign key constraint) is less likely with soft delete, but keep general error handling
+            logger.error('Error soft-deleting user:', { error: error.message, userId: userId });
             return { success: false, status: 500, message: 'Internal server error deleting user' };
         }
     }
