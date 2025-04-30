@@ -2,47 +2,13 @@ import prisma from '../models/prisma.js'; // Adjusted path based on file structu
 import jwt from 'jsonwebtoken';
 import { jwtSecret, jwtExpiresIn } from '../config/auth.js';
 import { logger } from '../config/logger.js';
-import CryptoJS from 'crypto-js'; // Import crypto-js
+import { hashPassword, verifyPassword } from '../utils/passwordUtils.js'; // Import centralized functions
 
-// PBKDF2 Configuration (adjust iterations as needed for security/performance balance)
-const PBKDF2_ITERATIONS = 10000; // Higher is generally better, but slower
-const KEY_SIZE = 512 / 32; // 512 bits output
-const SALT_SIZE = 128 / 8; // 128 bits salt
+// Removed PBKDF2 Configuration constants - now reside in passwordUtils.js
+// Removed internal _hashPassword and _verifyPassword methods
 
 class AuthService {
-    /**
-     * Hashes a password using PBKDF2 with a generated salt.
-     * @param {string} password - The plain text password.
-     * @returns {{hash: string, salt: string}} - The hashed password and the salt used, both as hex strings.
-     */
-    _hashPassword(password) {
-        const salt = CryptoJS.lib.WordArray.random(SALT_SIZE);
-        const hash = CryptoJS.PBKDF2(password, salt, {
-            keySize: KEY_SIZE,
-            iterations: PBKDF2_ITERATIONS
-        });
-        return {
-            hash: hash.toString(CryptoJS.enc.Hex),
-            salt: salt.toString(CryptoJS.enc.Hex)
-        };
-    }
-
-    /**
-     * Verifies a password against a stored hash and salt using PBKDF2.
-     * @param {string} password - The plain text password to verify.
-     * @param {string} storedHashHex - The stored password hash (hex string).
-     * @param {string} storedSaltHex - The stored salt (hex string).
-     * @returns {boolean} - True if the password matches, false otherwise.
-     */
-    _verifyPassword(password, storedHashHex, storedSaltHex) {
-        const salt = CryptoJS.enc.Hex.parse(storedSaltHex);
-        const hash = CryptoJS.PBKDF2(password, salt, {
-            keySize: KEY_SIZE,
-            iterations: PBKDF2_ITERATIONS
-        });
-        const computedHashHex = hash.toString(CryptoJS.enc.Hex);
-        return computedHashHex === storedHashHex;
-    }
+    // Internal helper methods _hashPassword and _verifyPassword removed
 
     /**
      * Authenticates a user based on email and password.
@@ -64,8 +30,8 @@ class AuthService {
                 return { success: false, status: 401, message: 'Invalid email or password' };
             }
 
-            // Verify password using crypto-js PBKDF2
-            const isPasswordValid = this._verifyPassword(password, user.password, user.password_salt);
+            // Verify password using centralized utility function
+            const isPasswordValid = verifyPassword(password, user.password, user.password_salt);
 
             if (!isPasswordValid) {
                 logger.warn(`Login failed: Incorrect password for email ${email}`);
@@ -126,8 +92,8 @@ class AuthService {
                 return { success: false, status: 400, message: 'Email already exists' };
             }
 
-            // Hash the password and generate salt using crypto-js PBKDF2
-            const { hash: hashedPassword, salt: passwordSalt } = this._hashPassword(password);
+            // Hash the password and generate salt using centralized utility function
+            const { hash: hashedPassword, salt: passwordSalt } = hashPassword(password);
 
             const newUser = await prisma.user.create({
                 data: {

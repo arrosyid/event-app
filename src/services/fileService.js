@@ -27,8 +27,8 @@ class FileService {
 
             // Security check: Ensure the resolved path is still within the intended upload directory
             if (!filePath.startsWith(uploadDir)) {
-                 logger.error(`Potential directory traversal attempt: ${filename} resolved to ${filePath}`);
-                 return { success: false, status: 400, message: 'Invalid filename' };
+                logger.error(`Potential directory traversal attempt: ${filename} resolved to ${filePath}`);
+                return { success: false, status: 400, message: 'Invalid filename' };
             }
 
             // Check if file exists using async fs promises

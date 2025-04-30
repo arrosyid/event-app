@@ -1,33 +1,12 @@
 import prisma from '../models/prisma.js'; // Adjusted path
 import { getAsync, setAsync, delAsync } from '../config/redis.js';
 import { logger } from '../config/logger.js';
-import CryptoJS from 'crypto-js'; // Import crypto-js
+import { hashPassword } from '../utils/passwordUtils.js'; // Import centralized function
 
-// PBKDF2 Configuration (should match AuthService)
-const PBKDF2_ITERATIONS = 10000;
-const KEY_SIZE = 512 / 32;
-const SALT_SIZE = 128 / 8;
+// Removed PBKDF2 Configuration constants and internal _hashPassword method
 
 class UserService {
-
-    /**
-     * Hashes a password using PBKDF2 with a generated salt.
-     * (Helper function, could be moved to a shared utility)
-     * @param {string} password - The plain text password.
-     * @returns {{hash: string, salt: string}} - The hashed password and the salt used, both as hex strings.
-     */
-    _hashPassword(password) {
-        const salt = CryptoJS.lib.WordArray.random(SALT_SIZE);
-        const hash = CryptoJS.PBKDF2(password, salt, {
-            keySize: KEY_SIZE,
-            iterations: PBKDF2_ITERATIONS
-        });
-        return {
-            hash: hash.toString(CryptoJS.enc.Hex),
-            salt: salt.toString(CryptoJS.enc.Hex)
-        };
-    }
-
+    // Internal helper method _hashPassword removed
 
     /**
      * Gets users based on the requesting user's role.
@@ -105,9 +84,9 @@ class UserService {
 
             const dataToUpdate = { name, email };
 
-            // Hash password using crypto-js if it's being updated
+            // Hash password using centralized utility function if it's being updated
             if (password) {
-                const { hash: hashedPassword, salt: passwordSalt } = this._hashPassword(password);
+                const { hash: hashedPassword, salt: passwordSalt } = hashPassword(password);
                 dataToUpdate.password = hashedPassword;
                 dataToUpdate.password_salt = passwordSalt; // Store the new salt
             }

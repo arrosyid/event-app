@@ -44,3 +44,5 @@ coverage/
 *.sln
 *.sw?
 *.conf
+
+.clinerules/

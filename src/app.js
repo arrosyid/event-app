@@ -17,7 +17,6 @@ import { handleGenericError } from './middlewares/errorMiddleware.js'; // Import
 
 // --- Routes ---
 import apiV1Router from './api/v1/routes/index.js';
-import MiscController from './controllers/miscController.js'; // For root /chat route
 
 // --- Setup ---
 const __filename = fileURLToPath(import.meta.url);
@@ -50,10 +49,6 @@ logger.info('Mounted API v1 routes at /api/v1');
 app.get('/', (req, res) => {
     res.send('Hello, Back-end!');
 });
-
-// --- Root HTML Route (for chat example) ---
-// Consider moving this if it's not part of the core API
-app.get('/chat', MiscController.getChatHtml);
 
 // --- Error Handling Middleware ---
 // Winston error logger should come after routes but before the final handler
