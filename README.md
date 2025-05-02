@@ -173,32 +173,6 @@ All configuration is managed through environment variables loaded via `dotenv` (
 *   `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`: Rate limiting settings.
 *   `MAX_FILE_SIZE_MB`: Maximum file upload size (used by Multer config).
 
-## Running Tests
-
-```bash
-pnpm test
-```
-*(Ensure your test environment is configured correctly, potentially using a separate test database.)*
-
-## Key Architectural Concepts
-
-This project adheres to several key architectural patterns and practices:
-
-*   **MVC-like Structure:** Separation into Routes, Controllers, Services, and Models (Prisma).
-*   **Service Layer:** Encapsulates business logic, interacting with the Prisma client.
-*   **Prisma ORM:** Manages database interactions, schema definition, and migrations.
-*   **Middleware:** Used extensively for cross-cutting concerns like authentication, authorization, validation, logging, error handling, rate limiting, and metrics.
-*   **JWT Authentication:** Stateless authentication using JSON Web Tokens.
-*   **Role-Based Access Control (RBAC):** Middleware enforces access based on user roles (Admin, User).
-*   **Input Validation:** `express-validator` ensures data integrity before processing.
-*   **Centralized Error Handling:** Consistent error responses and logging.
-*   **Structured Logging:** Winston provides detailed request and error logs.
-*   **Redis Caching:** Improves performance by caching frequently accessed data.
-*   **Prometheus Metrics:** Exposes application performance metrics.
-*   **Soft Deletes:** Preserves data by marking records as deleted instead of removing them permanently.
-*   **File Uploads:** Securely handles file uploads using Multer.
-*   **Transactional Operations:** Uses `prisma.$transaction` for atomic database operations (e.g., order creation, cancellation).
-
 ## Contributing
 
 (Optional: Add guidelines for contributing if this is an open project).
