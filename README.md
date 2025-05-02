@@ -100,6 +100,13 @@ All API endpoints are versioned under `/api/v1`.
 
 *(Refer to specific route files in `src/api/v1/routes/` for detailed endpoint definitions, HTTP methods, and required middleware/validation.)*
 
+## API Documentation
+
+This project includes resources to help you explore and interact with the API:
+
+*   **Postman Collection:** A Postman collection export is available at `postman-collection-export.json`. You can import this file into Postman to easily test the API endpoints. It includes pre-configured requests for various operations.
+*   **Swagger/OpenAPI Specification:** A Swagger 2.0 specification file is available at `swagger.json`. This file describes the API structure and can be used with tools like Swagger UI for interactive documentation and exploration.
+
 ## Getting Started
 
 ### Prerequisites
