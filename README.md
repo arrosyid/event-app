@@ -1,1 +1,208 @@
-# APP UNDER DEVELOPMENT
+# Event Management Application - Backend
+
+## Description
+
+This project is the backend system for an Event Management Application built with Node.js, Express.js, and Prisma. It provides a RESTful API for managing events, ticket types, user authentication, orders, payments (simulated), e-ticket generation, check-in validation, and more. The application follows best practices for structure, security, and maintainability as outlined in the project's coding standards.
+
+## Key Architectural Concepts
+
+This project adheres to several key architectural patterns and practices:
+
+*   **MVC-like Structure:** Separation into Routes, Controllers, Services, and Models (Prisma).
+*   **Service Layer:** Encapsulates business logic, interacting with the Prisma client.
+*   **Prisma ORM:** Manages database interactions, schema definition, and migrations.
+*   **Middleware:** Used extensively for cross-cutting concerns like authentication, authorization, validation, logging, error handling, rate limiting, and metrics.
+*   **JWT Authentication:** Stateless authentication using JSON Web Tokens.
+*   **Role-Based Access Control (RBAC):** Middleware enforces access based on user roles (Admin, User).
+*   **Input Validation:** `express-validator` ensures data integrity before processing.
+*   **Centralized Error Handling:** Consistent error responses and logging.
+*   **Structured Logging:** Winston provides detailed request and error logs.
+*   **Redis Caching:** Improves performance by caching frequently accessed data.
+*   **Prometheus Metrics:** Exposes application performance metrics.
+*   **Soft Deletes:** Preserves data by marking records as deleted instead of removing them permanently.
+*   **File Uploads:** Securely handles file uploads using Multer.
+*   **Transactional Operations:** Uses `prisma.$transaction` for atomic database operations (e.g., order creation, cancellation).
+
+## Key Features
+
+*   **User Management:** Registration, Login (JWT-based), Profile Management (including avatar uploads), Role-based access control (SuperAdmin, Admin, User/Participant).
+*   **Event Management (Admin):** CRUD operations for events (including details, location, poster image URL, capacity, status).
+*   **Ticket Type Management (Admin):** Define multiple ticket types per event (name, price, quantity/quota, sale dates, description). Supports pre-sale pricing logic (handled via service layer).
+*   **Ordering & Checkout:**
+    *   Users can browse and select tickets for events.
+    *   Users can place orders for tickets (rule: 1 ticket per user per ticket type per event).
+    *   Simulated manual payment processing.
+    *   Order lifecycle management (pending, paid, canceled, etc.).
+    *   Quota management for ticket types.
+*   **E-Ticket Generation:** Automatic generation of unique e-tickets (with placeholder QR codes) upon successful payment.
+*   **Check-in Validation (Under Development):** API endpoint planned for validating tickets via unique code (simulating QR code scan).
+*   **File Uploads:** Handles user avatar uploads using Multer with validation.
+*   **Security:** JWT authentication, password hashing (PBKDF2 with salt), rate limiting, CORS configuration.
+*   **Input Validation:** Uses `express-validator` for robust request validation.
+*   **Error Handling:** Centralized error handling middleware.
+*   **Logging:** Structured request and error logging using Winston.
+*   **Caching:** Redis caching for performance optimization (e.g., user lists).
+*   **Metrics:** Exposes application metrics for Prometheus via `prom-client`.
+*   **Soft Deletes:** Implemented for key models (User, Event, TicketType) to preserve data history.
+
+## Technologies Used
+
+*   **Backend Framework:** Express.js
+*   **Database ORM:** Prisma
+*   **Database:** MySQL (configurable via `DATABASE_URL`)
+*   **Authentication:** JSON Web Tokens (JWT)
+*   **Password Hashing:** `crypto-js` (PBKDF2)
+*   **Validation:** `express-validator`
+*   **File Uploads:** Multer
+*   **Caching:** Redis (`ioredis`)
+*   **Logging:** Winston, `winston-daily-rotate-file`
+*   **Metrics:** `prom-client`
+*   **API Testing:** Jest, Supertest
+*   **Package Manager:** pnpm
+*   **Runtime:** Node.js
+
+## Project Structure
+
+The project follows a feature-based structure with a clear separation of concerns:
+
+```
+├── prisma/             # Prisma schema and migrations
+├── src/
+│   ├── api/v1/routes/  # API route definitions (versioned)
+│   ├── config/         # Configuration files (db, auth, log, cors, redis, etc.)
+│   ├── controllers/    # Request handlers (Express route logic)
+│   ├── middlewares/    # Custom Express middleware (auth, error, validation, roles)
+│   ├── models/         # Data models and Prisma client setup
+│   ├── services/       # Business logic implementation
+│   ├── utils/          # Utility functions (e.g., password hashing)
+│   └── app.js          # Express application setup and server start
+├── tests/              # Unit and integration tests
+├── logs/               # Log files generated by Winston
+├── uploads/            # Directory for uploaded files (e.g., avatars)
+├── .env.development    # Example environment variables for development
+├── package.json
+├── pnpm-lock.yaml
+└── README.md
+```
+
+## API Endpoints Overview
+
+All API endpoints are versioned under `/api/v1`.
+
+*   `/api/v1/auth`: Authentication routes (register, login).
+*   `/api/v1/users`: User management routes (get profile, update profile, list users (admin)).
+*   `/api/v1/files`: File upload routes (e.g., avatars).
+*   `/api/v1/events`: Event management routes (CRUD for events, ticket types).
+*   `/api/v1/orders`: Order management routes (create order, list orders, get order details, cancel, checkout).
+*   `/api/v1/tickets`: Ticket management routes (validate check-in - *under development*).
+*   `/api/v1/metrics`: Exposes Prometheus metrics.
+*   `/api/v1/`: Miscellaneous routes (e.g., health check - if implemented).
+
+*(Refer to specific route files in `src/api/v1/routes/` for detailed endpoint definitions, HTTP methods, and required middleware/validation.)*
+
+## Getting Started
+
+### Prerequisites
+
+*   Node.js (Check `package.json` for engine requirements if specified, otherwise use a recent LTS version)
+*   pnpm (`npm install -g pnpm`)
+*   MySQL Server
+*   Redis Server
+
+### Installation & Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repository-url>
+    cd event-app
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+
+3.  **Set up environment variables:**
+    *   Copy the example environment file:
+        ```bash
+        cp .env.development .env
+        ```
+    *   Edit the `.env` file and provide your actual configuration values:
+        *   `PORT`: The port the application will run on (default: 3000).
+        *   `DATABASE_URL`: Your MySQL connection string (e.g., `mysql://user:password@host:port/database`).
+        *   `JWT_SECRET`: A strong, unique secret key for signing JWTs. **Change the default value!**
+        *   `JWT_EXPIRES_IN`: Token expiration time (e.g., "1h", "7d").
+        *   `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`: Connection details for your Redis instance.
+        *   Other variables as needed (CORS, Logging, Rate Limiting).
+
+4.  **Set up the database:**
+    *   Ensure your MySQL server is running and the database specified in `DATABASE_URL` exists.
+    *   Run Prisma migrations to create the database schema:
+        ```bash
+        npx prisma migrate dev
+        ```
+    *   *(Optional)* Seed the database if seed scripts are available:
+        ```bash
+        # npx prisma db seed (if you have a seed script configured in package.json)
+        ```
+
+5.  **Run the application:**
+    *   **Development mode (with hot-reloading):**
+        ```bash
+        pnpm dev
+        ```
+    *   **Production mode:**
+        ```bash
+        pnpm start
+        ```
+
+The server should now be running on the specified `PORT` (default: `http://localhost:3000`).
+
+## Configuration
+
+All configuration is managed through environment variables loaded via `dotenv` (implicitly by Prisma and potentially explicitly in `app.js`). Key variables are defined in the `.env` file (copied from `.env.development`).
+
+*   `NODE_ENV`: Set to `development` or `production`.
+*   `PORT`: Application port.
+*   `DATABASE_URL`: MySQL connection string.
+*   `JWT_SECRET`: Secret for JWT signing.
+*   `JWT_EXPIRES_IN`: JWT expiration time.
+*   `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`: Redis connection details.
+*   `CORS_ORIGIN`: Allowed origins for CORS.
+*   `LOG_DIR`, `LOG_LEVEL`: Logging configuration.
+*   `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`: Rate limiting settings.
+*   `MAX_FILE_SIZE_MB`: Maximum file upload size (used by Multer config).
+
+## Running Tests
+
+```bash
+pnpm test
+```
+*(Ensure your test environment is configured correctly, potentially using a separate test database.)*
+
+## Key Architectural Concepts
+
+This project adheres to several key architectural patterns and practices:
+
+*   **MVC-like Structure:** Separation into Routes, Controllers, Services, and Models (Prisma).
+*   **Service Layer:** Encapsulates business logic, interacting with the Prisma client.
+*   **Prisma ORM:** Manages database interactions, schema definition, and migrations.
+*   **Middleware:** Used extensively for cross-cutting concerns like authentication, authorization, validation, logging, error handling, rate limiting, and metrics.
+*   **JWT Authentication:** Stateless authentication using JSON Web Tokens.
+*   **Role-Based Access Control (RBAC):** Middleware enforces access based on user roles (Admin, User).
+*   **Input Validation:** `express-validator` ensures data integrity before processing.
+*   **Centralized Error Handling:** Consistent error responses and logging.
+*   **Structured Logging:** Winston provides detailed request and error logs.
+*   **Redis Caching:** Improves performance by caching frequently accessed data.
+*   **Prometheus Metrics:** Exposes application performance metrics.
+*   **Soft Deletes:** Preserves data by marking records as deleted instead of removing them permanently.
+*   **File Uploads:** Securely handles file uploads using Multer.
+*   **Transactional Operations:** Uses `prisma.$transaction` for atomic database operations (e.g., order creation, cancellation).
+
+## Contributing
+
+(Optional: Add guidelines for contributing if this is an open project).
+
+## License
+
+This project is licensed under the ISC License. See the `package.json` file for details.
