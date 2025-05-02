@@ -32,6 +32,27 @@ class OrderController {
     }
 
     /**
+     * @description Get all orders (Admin only)
+     * @route GET /api/v1/orders/all
+     * @access Private (Admin)
+     */
+    static async getAllOrders(req, res, next) {
+        // No validation needed here unless query params require it
+        try {
+            logger.info(`Fetching all orders (admin request)`);
+            // --- Service Call ---
+            // Pass query params for pagination/filtering/sorting
+            const result = await OrderService.getAllOrders(req.query);
+            res.status(result.status || 200).json(result);
+            // --- End Service Call ---
+
+        } catch (error) {
+            logger.error(`Error fetching all orders: ${error.message}`, { stack: error.stack });
+            next(error);
+        }
+    }
+
+    /**
      * @description Get orders for the logged-in user
      * @route GET /api/v1/orders
      * @access Private (User)
@@ -58,7 +79,6 @@ class OrderController {
      * @access Private (User - Own Order) / Admin?
      */
     static async getOrderByCode(req, res, next) {
-        // TODO: Revisit validation if orderCode is in params vs body
         const errors = validationResult(req); // Check if validation is set up for params
         if (!errors.isEmpty()) {
             // This might not work if validation targets body and code is in params
@@ -67,12 +87,14 @@ class OrderController {
         }
 
         const userId = req.user.id;
+        const userRole = req.user.role; // Extract user role
         const { orderCode } = req.params; // Assuming orderCode is a URL parameter
 
         try {
-            logger.info(`Fetching order ${orderCode} for user ${userId}`);
+            logger.info(`Fetching order ${orderCode} for user ${userId} (Role: ${userRole})`);
             // --- Service Call ---
-            const result = await OrderService.getOrderByCode(userId, orderCode);
+            // Pass userRole to the service method
+            const result = await OrderService.getOrderByCode(userId, orderCode, userRole);
             res.status(result.status || 200).json(result);
             // --- End Service Call ---
 
@@ -88,7 +110,6 @@ class OrderController {
      * @access Private (User - Own Order)
      */
     static async cancelOrder(req, res, next) {
-        // TODO: Revisit validation if orderCode is in params vs body
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });

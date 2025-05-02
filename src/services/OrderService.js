@@ -278,21 +278,97 @@ class OrderService {
     }
 
     /**
+     * Retrieves all orders (for admin use).
+     * @param {object} queryParams - Query parameters for pagination, filtering, etc.
+     * @returns {Promise<{success: boolean, status: number, message: string, data?: object}>}
+     */
+    static async getAllOrders(queryParams) {
+        logger.info(`[OrderService] Fetching all orders (admin view)`);
+        try {
+            const { page = 1, limit = 10, status, userId, sortBy = 'createdAt', sortOrder = 'desc' } = queryParams;
+            const pageNum = parseInt(page, 10);
+            const limitNum = parseInt(limit, 10);
+            const skip = (pageNum - 1) * limitNum;
+
+            const where = {}; // Start with empty where clause
+
+            // Add filters based on query params
+            if (status && ['pending', 'paid', 'failed', 'expired', 'canceled'].includes(status)) {
+                where.paymentStatus = status;
+            }
+            if (userId) {
+                const userIdNum = parseInt(userId, 10);
+                if (!isNaN(userIdNum)) {
+                    where.userId = userIdNum;
+                }
+            }
+            // Add more filters as needed (e.g., date range)
+
+            // Define valid sort fields to prevent injection
+            const validSortFields = ['createdAt', 'orderedAt', 'paidAt', 'totalAmount', 'paymentStatus'];
+            const orderByField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+            const orderDirection = sortOrder.toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+            const orders = await prisma.order.findMany({
+                where: where,
+                include: {
+                    orderItems: {
+                        include: {
+                            ticketType: {
+                                select: { name: true, eventId: true }
+                            }
+                        }
+                    },
+                    user: { // Include basic user info for context
+                        select: { id: true, name: true, email: true }
+                    }
+                },
+                orderBy: { [orderByField]: orderDirection },
+                skip: skip,
+                take: limitNum,
+            });
+
+            const totalOrders = await prisma.order.count({ where });
+            const totalPages = Math.ceil(totalOrders / limitNum);
+
+            return {
+                success: true,
+                status: 200,
+                message: 'All orders retrieved successfully.',
+                data: orders,
+                pagination: {
+                    currentPage: pageNum,
+                    totalPages,
+                    totalItems: totalOrders,
+                    limit: limitNum,
+                },
+            };
+        } catch (error) {
+            logger.error(`[OrderService] Error fetching all orders: ${error.message}`, { stack: error.stack });
+            return { success: false, status: 500, message: 'Failed to retrieve all orders.' };
+        }
+    }
+
+
+    /**
      * Retrieves orders for a specific user.
      * @param {number} userId - The ID of the user.
      * @param {object} queryParams - Query parameters for pagination, filtering, etc.
      * @returns {Promise<{success: boolean, status: number, message: string, data?: object}>}
      */
     static async getUserOrders(userId, queryParams) {
-        logger.info(`[OrderService] Fetching orders for user ${userId}`);
+        logger.info(`[OrderService] Fetching orders for user ${userId} with params: ${JSON.stringify(queryParams)}`);
         try {
-            // TODO: Implement pagination, filtering based on queryParams
-            const { page = 1, limit = 10 } = queryParams;
+            const { page = 1, limit = 10, status } = queryParams; // Add status filter
             const pageNum = parseInt(page, 10);
             const limitNum = parseInt(limit, 10);
             const skip = (pageNum - 1) * limitNum;
 
             const where = { userId: userId };
+            // Add status filter if provided and valid
+            if (status && ['pending', 'paid', 'failed', 'expired', 'canceled'].includes(status)) {
+                where.paymentStatus = status;
+            }
 
             const orders = await prisma.order.findMany({
                 where: where,
@@ -336,9 +412,10 @@ class OrderService {
      * Retrieves a specific order by its code, ensuring user ownership.
      * @param {number} userId - The ID of the user requesting the order.
      * @param {string} orderCode - The unique code of the order.
+     * @param {string} [userRole] - Optional user role (currently unused for strict ownership).
      * @returns {Promise<{success: boolean, status: number, message: string, data?: object}>}
      */
-    static async getOrderByCode(userId, orderCode) {
+    static async getOrderByCode(userId, orderCode, userRole) { // userRole param kept but logic removed
         logger.info(`[OrderService] Fetching order ${orderCode} for user ${userId}`);
         try {
             const order = await prisma.order.findUnique({
@@ -368,10 +445,14 @@ class OrderService {
             }
 
             // Verify ownership (or if user is admin)
-            // TODO: Add role check if admins can view any order
-            if (order.userId !== userId) {
-                logger.warn(`[OrderService] User ${userId} attempted to access order ${orderCode} owned by user ${order.userId}`);
+            if (userRole.toLocaleLowerCase() !== 'admin' && order.userId !== userId) {
+                logger.warn(`[OrderService] User ${userId} (Role: ${userRole}) attempted to access order ${orderCode} owned by user ${order.userId}`);
                 return { success: false, status: 403, message: 'You are not authorized to view this order.' };
+            }else if (userRole.toLocaleLowerCase() === 'admin' && order.userId !== userId) {
+                // check userRole admin maka hapus ticket dari data yg di return
+                order.orderItems.forEach(item => {
+                    delete item.tickets;
+                });
             }
 
             return {
@@ -396,7 +477,7 @@ class OrderService {
         logger.info(`[OrderService] Attempting to cancel order ${orderCode} for user ${userId}`);
         try {
              // Use transaction to ensure atomicity
-             await prisma.$transaction(async (tx) => {
+            await prisma.$transaction(async (tx) => {
                 const order = await tx.order.findUnique({
                     where: { orderCode: orderCode },
                     include: { orderItems: true } // Need items to revert quota
@@ -408,7 +489,6 @@ class OrderService {
 
                 // Verify ownership
                 if (order.userId !== userId) {
-                    // TODO: Add role check if needed
                     logger.warn(`[OrderService] User ${userId} attempted to cancel order ${orderCode} owned by user ${order.userId}`);
                     throw new Error('You are not authorized to cancel this order.');
                 }

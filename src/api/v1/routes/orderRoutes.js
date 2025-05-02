@@ -2,7 +2,7 @@ import express from 'express';
 import { body, param } from 'express-validator'; // Import param
 import OrderController from '../../../controllers/OrderController.js';
 import authMiddleware from '../../../middlewares/authMiddleware.js';
-// import roleMiddleware from '../../../middlewares/roleMiddleware.js'; // Uncomment if needed for admin routes
+import roleMiddleware from '../../../middlewares/roleMiddleware.js'; // Ensure this is imported and uncommented
 
 const router = express.Router();
 
@@ -42,6 +42,14 @@ router.get(
     '/',
     authMiddleware,
     OrderController.getUserOrders
+);
+
+// GET /api/v1/orders/all - Get orders for the logged-in user
+router.get(
+    '/all',
+    authMiddleware,
+    roleMiddleware(['admin']), // Keep admin role check
+    OrderController.getAllOrders // Use the new controller method
 );
 
 // GET /api/v1/orders/:orderCode - Get specific order details
