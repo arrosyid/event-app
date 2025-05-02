@@ -186,4 +186,4 @@ All configuration is managed through environment variables loaded via `dotenv` (
 
 ## License
 
-This project is licensed under the ISC License. See the `package.json` file for details.
+This project is licensed under the MIT license. See the [LICENSE](https://github.com/arrosyid/event-app/blob/master/LICENSE) file for details.
