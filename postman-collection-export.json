@@ -1,0 +1,996 @@
+{
+	"info": {
+		"_postman_id": "a2c8535b-809b-463c-b597-5a857473d3b6",
+		"name": "event-app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14607756",
+		"_collection_link": "https://blue-escape-526677.postman.co/workspace/Presensi~0cd4c079-b8ca-4de7-930a-6a2753e1923e/collection/14607756-a2c8535b-809b-463c-b597-5a857473d3b6?action=share&source=collection_link&creator=14607756"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "// {\r\n//     \"name\":\"iqbal\",\r\n//     \"email\":\"iqbal@mail.com\",\r\n//     \"password\":\"12345678\",\r\n//     \"phone_number\":\"018231264\",\r\n//     \"role\":\"admin\"\r\n// }\r\n\r\n// {\r\n//     \"name\":\"user\",\r\n//     \"email\":\"user@mail.com\",\r\n//     \"password\":\"12345678\",\r\n//     \"phone_number\":\"018231264\",\r\n//     \"role\":\"user\"\r\n// }\r\n// {\r\n//     \"name\":\"user1\",\r\n//     \"email\":\"user111@mail.com\",\r\n//     \"password\":\"12345678\",\r\n//     \"phone_number\":\"018231264\"\r\n// }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"pm.collectionVariables.set(\"auth_token\", response.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "// {\r\n//     \"email\":\"iqbal@mail.com\",\r\n//     \"password\":\"12345678\"\r\n// }\r\n\r\n{\r\n    \"email\":\"user@mail.com\",\r\n    \"password\":\"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    pm.collectionVariables.unset(\"auth_token\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/auth/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getUser",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "activate user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/users/activate/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"activate",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit User",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"user\",\r\n    \"email\":\"user@mail.com\",\r\n    \"password\":\"12345678\",\r\n    \"phone_number\":\"01823264\",\r\n    \"role\":\"halo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/users/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ChangeUser role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"role\":\"user\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/users/change-role/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"change-role",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/users/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "events",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events"
+					],
+					"query": [
+						{
+							"key": "category",
+							"value": "fotografi",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "konser",
+							"disabled": true
+						},
+						{
+							"key": "status",
+							"value": "published",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "order",
+							"value": "desc",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "status",
+							"disabled": true
+						},
+						{
+							"key": "date",
+							"value": "2025-04-15",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Events By ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/17",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"17"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buat Event",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n// {\r\n//     \"name\": \"Konferensi Teknologi Akbar 2024\",\r\n//     \"description\": \"Konferensi tahunan terbesar yang membahas tren teknologi terkini.\",\r\n//     \"startTime\": \"2025-04-15T09:00:00.000Z\",\r\n//     \"endTime\": \"2025-05-16T17:00:00.000Z\",\r\n//     \"location\": \"Balai Konvensi Megah\",\r\n//     \"locationDetails\": \"Lantai 2, Ruang Serbaguna Utama\",\r\n//     \"posterImageUrl\": \"https://contoh.com/images/konferensi-tech-2024.jpg\",\r\n//     \"category\": \"Teknologi\",\r\n//     \"capacity\": 1000,\r\n//     \"status\": \"published\"\r\n// }\r\n// {\r\n//     \"name\": \"Festival Musik Musim Panas\",\r\n//     \"description\": \"Nikmati musik live dari band lokal dan nasional di bawah langit terbuka.\",\r\n//     \"startTime\": \"2025-04-20T14:00:00+07:00\",\r\n//     \"endTime\": \"2025-04-20T23:59:00+07:00\",\r\n//     \"location\": \"Lapangan Kota Merdeka\",\r\n//     \"category\": \"Musik\",\r\n//     \"capacity\": 5000\r\n// }\r\n// {\r\n//     \"name\": \"Workshop Melukis Cat Air\",\r\n//     \"description\": \"Pelajari teknik dasar melukis cat air bersama seniman profesional.\",\r\n//     \"startTime\": \"2025-08-05T10:00:00.000Z\",\r\n//     \"endTime\": \"2025-08-05T13:00:00.000Z\",\r\n//     \"location\": \"Sanggar Seni Pelangi\",\r\n//     \"locationDetails\": \"Studio B\",\r\n//     \"category\": \"Seni & Kriya\",\r\n//     \"capacity\": 15,\r\n//     \"status\": \"draft\"\r\n// }\r\n// {\r\n//     \"name\": \"Lari Amal 5K\",\r\n//     \"description\": \"Berlari untuk tujuan mulia, seluruh hasil didonasikan.\",\r\n//     \"startTime\": \"2025-09-01T07:00:00+07:00\",\r\n//     \"endTime\": \"2025-09-01T10:00:00+07:00\",\r\n//     \"location\": \"Taman Kota Sejahtera\",\r\n//     \"category\": \"Olahraga\",\r\n//     \"capacity\": 300,\r\n//     \"status\": \"published\"\r\n// }\r\n// {\r\n//     \"name\": \"Seminar Pemasaran Digital\",\r\n//     \"description\": \"Strategi terbaru untuk meningkatkan visibilitas online bisnis Anda.\",\r\n//     \"startTime\": \"2025-06-10T09:30:00.000Z\",\r\n//     \"endTime\": \"2025-06-10T16:00:00.000Z\",\r\n//     \"location\": \"Hotel Bisnis Sentral\",\r\n//     \"locationDetails\": \"Ballroom Tulip\",\r\n//     \"posterImageUrl\": \"https://contoh.com/images/seminar-digital.png\",\r\n//     \"category\": \"Bisnis\",\r\n//     \"capacity\": 200,\r\n//     \"status\": \"completed\"\r\n// }\r\n// {\r\n//     \"name\": \"Pertemuan Klub Buku Bulanan\",\r\n//     \"description\": \"Diskusi buku 'Bumi Manusia' karya Pramoedya Ananta Toer.\",\r\n//     \"startTime\": \"2025-08-25T19:00:00+07:00\",\r\n//     \"endTime\": \"2025-08-25T21:00:00+07:00\",\r\n//     \"location\": \"Perpustakaan Daerah\",\r\n//     \"category\": \"Komunitas\",\r\n//     \"capacity\": 30,\r\n//     \"status\": \"published\"\r\n// }\r\n// {\r\n//     \"name\": \"Webinar Pengenalan Investasi Saham\",\r\n//     \"description\": \"Pahami dasar-dasar investasi saham untuk pemula.\",\r\n//     \"startTime\": \"2025-09-05T19:30:00.000Z\",\r\n//     \"endTime\": \"2025-09-05T21:00:00.000Z\",\r\n//     \"location\": \"Online via Zoom\",\r\n//     \"locationDetails\": \"Link akan dikirim H-1\",\r\n//     \"category\": \"Finansial\",\r\n//     \"capacity\": 0,\r\n//     \"status\": \"published\"\r\n// }\r\n// {\r\n//     \"name\": \"Pameran Fotografi Alam\",\r\n//     \"description\": \"Menampilkan karya-karya indah fotografer alam Indonesia.\",\r\n//     \"startTime\": \"2025-10-01T10:00:00+07:00\",\r\n//     \"endTime\": \"2025-10-07T18:00:00+07:00\",\r\n//     \"location\": \"Galeri Seni Nasional\",\r\n//     \"posterImageUrl\": \"https://contoh.com/images/pameran-foto.jpg\",\r\n//     \"category\": \"Fotografi\",\r\n//     \"capacity\": 500,\r\n//     \"status\": \"cancelled\"\r\n// }\r\n// {\r\n//     \"name\": \"Yoga Pagi di Taman\",\r\n//     \"description\": \"Mulai hari Anda dengan sesi yoga yang menyegarkan.\",\r\n//     \"startTime\": \"2025-08-17T06:30:00.000Z\",\r\n//     \"endTime\": \"2025-08-17T07:30:00.000Z\",\r\n//     \"location\": \"Taman Suropati\",\r\n//     \"locationDetails\": \"Area dekat air mancur\",\r\n//     \"category\": \"Kesehatan & Kebugaran\",\r\n//     \"capacity\": 50,\r\n//     \"status\": \"published\"\r\n// }\r\n// {\r\n//     \"name\": \"Nonton Bareng Film Indie\",\r\n//     \"description\": \"Pemutaran film-film pendek karya sineas independen lokal.\",\r\n//     \"startTime\": \"2025-09-21T19:00:00+07:00\",\r\n//     \"endTime\": \"2025-09-21T22:00:00+07:00\",\r\n//     \"location\": \"Ruang Komunitas Kreatif\",\r\n//     \"locationDetails\": \"Layar utama\",\r\n//     \"posterImageUrl\": \"https://contoh.com/images/nobar-indie.gif\",\r\n//     \"capacity\": 75,\r\n//     \"status\": \"draft\"\r\n// }\r\n// {\r\n//     \"name\": \"Kopi bareng komunitas\",\r\n//     \"description\": \"nmgopi bareng disini\",\r\n//     \"startTime\": \"2025-09-21T19:00:00+07:00\",\r\n//     \"endTime\": \"2025-09-21T22:00:00+07:00\",\r\n//     \"location\": \"fordo Kopi\",\r\n//     \"locationDetails\": \"Layar utama\",\r\n//     \"posterImageUrl\": \"https://contoh.com/images/nobar-indie.gif\",\r\n//     \"capacity\": 75,\r\n//     \"status\": \"published\"\r\n// }\r\n\r\n{\r\n  \"name\": \"Konser Akbar\",\r\n  \"description\": \"Konser musik tahunan\",\r\n  \"startTime\": \"2025-12-01T19:00:00.000Z\",\r\n  \"endTime\": \"2025-12-01T23:00:00.000Z\",\r\n  \"location\": \"Stadium Utama\",\r\n  \"capacity\": 5000,\r\n  \"posterImageUrl\": \"https://contoh.com/images/nobar-indie.gif\",\r\n  \"status\": \"published\",\r\n  \"ticketTypes\": [\r\n    {\r\n      \"name\": \"VIP\",\r\n      \"price\": 1000000,\r\n      \"quantity\": 500,\r\n      \"saleStartDate\": \"2025-10-01T10:00:00.000Z\",\r\n      \"saleEndDate\": \"2025-11-30T23:59:59.000Z\",\r\n      \"description\": \"Akses backstage\"\r\n    },\r\n    {\r\n      \"name\": \"Regular\",\r\n      \"price\": 500000,\r\n      \"quantity\": 4508,\r\n      \"saleStartDate\": \"2025-10-01T10:00:00.000Z\",\r\n      \"saleEndDate\": \"2025-11-30T23:59:59.000Z\"\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "events",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Pameran Fotografi Alam\",\r\n    \"description\": \"Menampilkan karya-karya indah fotografer alam Indonesia.\",\r\n    \"startTime\": \"2025-10-01T10:00:00+07:00\",\r\n    \"endTime\": \"2025-10-07T18:00:00+07:00\",\r\n    \"location\": \"Galeri Seni Nasional\",\r\n    \"posterImageUrl\": \"https://contoh.com/images/pameran-foto.jpg\",\r\n    \"category\": \"Fotografi\",\r\n    \"capacity\": 500,\r\n    \"status\": \"cancelled\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/11",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Events By ID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/17",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"17"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ticket-types",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"VVIPP\",\r\n    \"price\": 5000000,\r\n    \"quantity\": 5,\r\n    \"saleStartDate\": \"2025-10-01T10:00:00.000Z\",\r\n    \"saleEndDate\": \"2025-11-30T23:59:59.000Z\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/17/ticket-types",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"17",
+						"ticket-types"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ticket-types",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Reguler\",\r\n    \"price\": 500000,\r\n    \"quantity\": 500,\r\n    \"saleStartDate\": \"2025-10-01T10:00:00.000Z\",\r\n    \"saleEndDate\": \"2025-11-30T23:59:59.000Z\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/17/ticket-types/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"17",
+						"ticket-types",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ticket-types",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/events/17/ticket-types/11",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"events",
+						"17",
+						"ticket-types",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order by OrderID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders/{{orderCode}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"{{orderCode}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"pm.collectionVariables.set(\"orderCode\", response.data.orderCode);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"items\": [\r\n    {\r\n      \"ticketTypeId\": 1\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel Order by OrderID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders/{{orderCode}}/cancel",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"{{orderCode}}",
+						"cancel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Payment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"paymentMethod\": \"cash\",\r\n  \"paymentDate\": \"2023-02-20\",\r\n  \"paymentAmount\": 1000000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders/{{orderCode}}/checkout-manual",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"{{orderCode}}",
+						"checkout-manual"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ticket",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/tickets/my",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"tickets",
+						"my"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "orderCode",
+			"value": ""
+		},
+		{
+			"key": "auth_token",
+			"value": ""
+		}
+	]
+}
