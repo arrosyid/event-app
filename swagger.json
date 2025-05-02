@@ -1,0 +1,738 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "title": "event-app",
+        "version": "1.0.0"
+    },
+    "host": "localhost",
+    "basePath": "/",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "login",
+                "operationId": "login",
+                "summary": "login"
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "logout",
+                "operationId": "logout",
+                "summary": "logout"
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "register",
+                "operationId": "register",
+                "summary": "register"
+            }
+        },
+        "/api/v1/events": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "date",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "events",
+                "operationId": "events",
+                "summary": "events"
+            }
+        },
+        "/api/v1/events/": {
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Buat Event",
+                "operationId": "buatEvent",
+                "summary": "Buat Event"
+            }
+        },
+        "/api/v1/events/11": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "capacity": {
+                                    "example": 500,
+                                    "type": "number"
+                                },
+                                "category": {
+                                    "example": "Fotografi",
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "example": "Menampilkan karya-karya indah fotografer alam Indonesia.",
+                                    "type": "string"
+                                },
+                                "endTime": {
+                                    "example": "2025-10-07T18:00:00+07:00",
+                                    "type": "string"
+                                },
+                                "location": {
+                                    "example": "Galeri Seni Nasional",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "example": "Pameran Fotografi Alam",
+                                    "type": "string"
+                                },
+                                "posterImageUrl": {
+                                    "example": "https://contoh.com/images/pameran-foto.jpg",
+                                    "type": "string"
+                                },
+                                "startTime": {
+                                    "example": "2025-10-01T10:00:00+07:00",
+                                    "type": "string"
+                                },
+                                "status": {
+                                    "example": "cancelled",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "events",
+                "operationId": "events1",
+                "summary": "events"
+            }
+        },
+        "/api/v1/events/17": {
+            "delete": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Events By ID",
+                "operationId": "eventsById1",
+                "summary": "Events By ID"
+            },
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Events By ID",
+                "operationId": "eventsById",
+                "summary": "Events By ID"
+            }
+        },
+        "/api/v1/events/17/ticket-types": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "example": "VVIPP",
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "example": 5000000,
+                                    "type": "number"
+                                },
+                                "quantity": {
+                                    "example": 5,
+                                    "type": "number"
+                                },
+                                "saleEndDate": {
+                                    "example": "2025-11-30T23:59:59.000Z",
+                                    "type": "string"
+                                },
+                                "saleStartDate": {
+                                    "example": "2025-10-01T10:00:00.000Z",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "ticket-types",
+                "operationId": "ticketTypes",
+                "summary": "ticket-types"
+            }
+        },
+        "/api/v1/events/17/ticket-types/11": {
+            "delete": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "ticket-types",
+                "operationId": "ticketTypes2",
+                "summary": "ticket-types"
+            }
+        },
+        "/api/v1/events/17/ticket-types/2": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "name": {
+                                    "example": "Reguler",
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "example": 500000,
+                                    "type": "number"
+                                },
+                                "quantity": {
+                                    "example": 500,
+                                    "type": "number"
+                                },
+                                "saleEndDate": {
+                                    "example": "2025-11-30T23:59:59.000Z",
+                                    "type": "string"
+                                },
+                                "saleStartDate": {
+                                    "example": "2025-10-01T10:00:00.000Z",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "ticket-types",
+                "operationId": "ticketTypes1",
+                "summary": "ticket-types"
+            }
+        },
+        "/api/v1/orders": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Order",
+                "operationId": "order",
+                "summary": "Order"
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "items": {
+                                    "example": [
+                                        {
+                                            "ticketTypeId": 1
+                                        }
+                                    ],
+                                    "items": {
+                                        "properties": {
+                                            "ticketTypeId": {
+                                                "example": 1,
+                                                "type": "number"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Order",
+                "operationId": "order1",
+                "summary": "Order"
+            }
+        },
+        "/api/v1/orders/{orderCode}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "orderCode",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Order by OrderID",
+                "operationId": "orderByOrderid",
+                "summary": "Order by OrderID"
+            }
+        },
+        "/api/v1/orders/{orderCode}/cancel": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "orderCode",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Cancel Order by OrderID",
+                "operationId": "cancelOrderByOrderid",
+                "summary": "Cancel Order by OrderID"
+            }
+        },
+        "/api/v1/orders/{orderCode}/checkout-manual": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "orderCode",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "paymentAmount": {
+                                    "example": 1000000,
+                                    "type": "number"
+                                },
+                                "paymentDate": {
+                                    "example": "2023-02-20",
+                                    "type": "string"
+                                },
+                                "paymentMethod": {
+                                    "example": "cash",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Payment",
+                "operationId": "payment",
+                "summary": "Payment"
+            }
+        },
+        "/api/v1/tickets/my": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Ticket",
+                "operationId": "ticket",
+                "summary": "Ticket"
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "getUser",
+                "operationId": "getuser",
+                "summary": "getUser"
+            }
+        },
+        "/api/v1/users/2": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "email": {
+                                    "example": "user@mail.com",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "example": "user",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "example": "12345678",
+                                    "type": "string"
+                                },
+                                "phone_number": {
+                                    "example": "01823264",
+                                    "type": "string"
+                                },
+                                "role": {
+                                    "example": "halo",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Edit User",
+                "operationId": "editUser",
+                "summary": "Edit User"
+            }
+        },
+        "/api/v1/users/5": {
+            "delete": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Delete user",
+                "operationId": "deleteUser",
+                "summary": "Delete user"
+            }
+        },
+        "/api/v1/users/activate/2": {
+            "patch": {
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "activate user",
+                "operationId": "activateUser",
+                "summary": "activate user"
+            }
+        },
+        "/api/v1/users/change-role/2": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "properties": {
+                                "role": {
+                                    "example": "user",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "ChangeUser role",
+                "operationId": "changeuserRole",
+                "summary": "ChangeUser role"
+            }
+        }
+    },
+    "tags": []
+}
