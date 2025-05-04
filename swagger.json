@@ -410,6 +410,21 @@
                 ],
                 "parameters": [
                     {
+                        "in": "query",
+                        "name": "page",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "string"
+                    },
+                    {
                         "in": "body",
                         "name": "body",
                         "schema": {
@@ -423,9 +438,9 @@
                         "description": ""
                     }
                 },
-                "description": "Order",
-                "operationId": "order",
-                "summary": "Order"
+                "description": "Order By UserID",
+                "operationId": "orderByUserid",
+                "summary": "Order By UserID"
             },
             "post": {
                 "consumes": [
@@ -465,8 +480,58 @@
                     }
                 },
                 "description": "Order",
-                "operationId": "order1",
+                "operationId": "order",
                 "summary": "Order"
+            }
+        },
+        "/api/v1/orders/all": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortBy",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortOrder",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "All Order",
+                "operationId": "allOrder",
+                "summary": "All Order"
             }
         },
         "/api/v1/orders/{orderCode}": {
@@ -601,9 +666,100 @@
                         "description": ""
                     }
                 },
-                "description": "Ticket",
-                "operationId": "ticket",
-                "summary": "Ticket"
+                "description": "Ticket By UserID",
+                "operationId": "ticketByUserid",
+                "summary": "Ticket By UserID"
+            }
+        },
+        "/api/v1/tickets/paid": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Ticket ALL admin",
+                "operationId": "ticketAllAdmin",
+                "summary": "Ticket ALL admin"
+            }
+        },
+        "/api/v1/tickets/{ticketTest}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "ticketTest",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Ticket By ID",
+                "operationId": "ticketById",
+                "summary": "Ticket By ID"
+            }
+        },
+        "/api/v1/tickets/{ticketTest}/checkin": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "ticketTest",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "format": "binary",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "description": "Check in ticket",
+                "operationId": "checkInTicket",
+                "summary": "Check in ticket"
             }
         },
         "/api/v1/users": {

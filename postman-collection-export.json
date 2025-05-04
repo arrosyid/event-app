@@ -64,7 +64,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "// {\r\n//     \"email\":\"iqbal@mail.com\",\r\n//     \"password\":\"12345678\"\r\n// }\r\n\r\n{\r\n    \"email\":\"user@mail.com\",\r\n    \"password\":\"12345678\"\r\n}",
+					"raw": "{\r\n    \"email\":\"iqbal@mail.com\",\r\n    \"password\":\"12345678\"\r\n}\r\n\r\n// {\r\n//     \"email\":\"user@mail.com\",\r\n//     \"password\":\"12345678\"\r\n// }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -715,7 +715,78 @@
 			"response": []
 		},
 		{
-			"name": "Order",
+			"name": "All Order",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/orders/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"all"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "20",
+							"disabled": true
+						},
+						{
+							"key": "status",
+							"value": "paid",
+							"disabled": true
+						},
+						{
+							"key": "sortBy",
+							"value": "totalAmount",
+							"disabled": true
+						},
+						{
+							"key": "sortOrder",
+							"value": "desc",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order By UserID",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -752,6 +823,23 @@
 						"api",
 						"v1",
 						"orders"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "5",
+							"disabled": true
+						},
+						{
+							"key": "status",
+							"value": "paid",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -939,7 +1027,7 @@
 			"response": []
 		},
 		{
-			"name": "Ticket",
+			"name": "Ticket By UserID",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -977,6 +1065,136 @@
 						"v1",
 						"tickets",
 						"my"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ticket By ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/tickets/{{ticketTest}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"tickets",
+						"{{ticketTest}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ticket ALL admin",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/tickets/paid",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"tickets",
+						"paid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check in ticket",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{port}}/api/v1/tickets/{{ticketTest}}/checkin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"tickets",
+						"{{ticketTest}}",
+						"checkin"
 					]
 				}
 			},
