@@ -199,10 +199,6 @@ All configuration is managed through environment variables loaded via `dotenv` (
 *   `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`: Rate limiting settings.
 *   `MAX_FILE_SIZE_MB`: Maximum file upload size (used by Multer config).
 
-## Contributing
-
-(Optional: Add guidelines for contributing if this is an open project).
-
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](https://github.com/arrosyid/event-app/blob/master/LICENSE) file for details.
