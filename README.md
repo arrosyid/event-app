@@ -4,6 +4,22 @@
 
 This project is the backend system for an Event Management Application built with Node.js, Express.js, and Prisma. It provides a RESTful API for managing events, ticket types, user authentication, orders, payments (simulated), e-ticket generation, check-in validation, and more. The application follows best practices for structure, security, and maintainability as outlined in the project's coding standards.
 
+## Table of Contents
+
+*   [Description](#description)
+*   [Key Architectural Concepts](#key-architectural-concepts)
+*   [Key Features](#key-features)
+*   [Technologies Used](#technologies-used)
+*   [Project Structure](#project-structure)
+*   [API Endpoints Overview](#api-endpoints-overview)
+*   [API Documentation](#api-documentation)
+*   [Getting Started](#getting-started)
+    *   [Prerequisites](#prerequisites)
+    *   [Installation & Setup](#installation--setup)
+*   [Configuration](#configuration)
+*   [Contributing](#contributing)
+*   [License](#license)
+
 ## Key Architectural Concepts
 
 This project adheres to several key architectural patterns and practices:
@@ -104,7 +120,14 @@ All API endpoints are versioned under `/api/v1`.
 
 This project includes resources to help you explore and interact with the API:
 
-*   **Postman Collection:** A Postman collection export is available at `postman-collection-export.json`. You can import this file into Postman to easily test the API endpoints. It includes pre-configured requests for various operations.
+*   **Postman Collection:** A Postman collection export is available at `postman-collection-export.json`. You can import this file into Postman to easily test the API endpoints.
+    *   **Importing:** In Postman, go to `File > Import...` and select the `postman-collection-export.json` file.
+    *   **Configuration:** The collection uses variables:
+        *   `{{port}}`: Set this in your Postman environment or collection variables to match the port your application is running on (default: 3000).
+        *   `{{auth_token}}`: This variable is automatically set by the "login" request's test script upon successful login. Most protected endpoints use this variable for Bearer token authentication.
+        *   `{{orderCode}}`: Automatically set by the "Order" request upon successful order creation. Used by subsequent order-related requests.
+        *   `{{ticketTest}}`: You might need to manually set this variable with a valid ticket `uniqueCode` obtained from creating an order and payment, or by fetching tickets, to test the specific ticket endpoints.
+    *   **Usage:** The collection includes pre-configured requests for various operations. Some requests (like `register`, `login`, `Buat Event`) have example request bodies commented out in the "Body > raw" tab. You'll need to uncomment and potentially modify these examples to use them.
 *   **Swagger/OpenAPI Specification:** A Swagger 2.0 specification file is available at `swagger.json`. This file describes the API structure and can be used with tools like Swagger UI for interactive documentation and exploration.
 
 ## Getting Started
@@ -148,10 +171,6 @@ This project includes resources to help you explore and interact with the API:
         ```bash
         npx prisma migrate dev
         ```
-    *   *(Optional)* Seed the database if seed scripts are available:
-        ```bash
-        # npx prisma db seed (if you have a seed script configured in package.json)
-        ```
 
 5.  **Run the application:**
     *   **Development mode (with hot-reloading):**
@@ -163,7 +182,7 @@ This project includes resources to help you explore and interact with the API:
         pnpm start
         ```
 
-The server should now be running on the specified `PORT` (default: `http://localhost:3000`).
+The server should now be running on the specified `PORT` (default: `http://localhost:3000`). You can interact with the API using tools like Postman (see [API Documentation](#api-documentation) for collection setup) or Swagger UI. Note that the included Postman collection contains raw request body examples for many endpoints.
 
 ## Configuration
 
