@@ -152,6 +152,163 @@ class TicketService {
             return { success: false, status: 500, message: 'Failed to retrieve user paid tickets.' };
         }
     }
+
+    /**
+     * Retrieves ticket details by unique code, accessible by owner or admin.
+     * @param {string} uniqueCode - The unique code of the ticket.
+     * @param {object} user - The authenticated user object ({ id, role }).
+     * @returns {Promise<{success: boolean, status: number, message: string, data?: object}>}
+     */
+
+    static async getTicketByCode(uniqueCode, user) {
+        logger.info(`[TicketService] Fetching ticket by code ${uniqueCode} for user ${user.id}`);
+        try {
+            const ticket = await prisma.ticket.findUnique({
+                where: { uniqueCode: uniqueCode, deletedAt: null }, // Ensure not soft-deleted
+                include: {
+                    event: { select: { id: true, name: true, startTime: true, location: true, status: true } },
+                    user: { select: { id: true, name: true, email: true } }, // Ticket owner
+                    ticketType: { select: { id: true, name: true, price: true } },
+                    orderItem: {
+                        select: {
+                            order: { select: { orderCode: true, paidAt: true } }
+                        }
+                    }
+                }
+            });
+
+            if (!ticket) {
+                logger.warn(`[TicketService] Ticket with code ${uniqueCode} not found.`);
+                return { success: false, status: 404, message: 'Ticket not found.' };
+            }
+
+            // Authorization check: Owner or Admin
+            if (ticket.userId !== user.id && user.role !== 'admin') {
+                logger.warn(`[TicketService] User ${user.id} (role: ${user.role}) unauthorized to access ticket ${uniqueCode} owned by ${ticket.userId}.`);
+                return { success: false, status: 403, message: 'Forbidden. You do not have permission to view this ticket.' };
+            }
+
+            // Construct full QR code URL
+            const ticketWithFullUrl = {
+                ...ticket,
+                qrCodeUrl: constructQrCodeUrl(ticket.qrCodeUrl)
+            };
+
+            logger.info(`[TicketService] Ticket ${uniqueCode} retrieved successfully for user ${user.id}.`);
+            return { success: true, status: 200, message: 'Ticket retrieved successfully.', data: ticketWithFullUrl };
+
+        } catch (error) {
+            logger.error(`[TicketService] Error fetching ticket by code ${uniqueCode}: ${error.message}`, { stack: error.stack });
+            return { success: false, status: 500, message: 'Failed to retrieve ticket details.' };
+        }
+    }
+
+    /**
+     * Checks in a ticket, accessible only by admin.
+     * Validates check-in time window and event status.
+     * @param {string} uniqueCode - The unique code of the ticket to check in.
+     * @param {number} adminUserId - The ID of the admin performing the check-in.
+     * @returns {Promise<{success: boolean, status: number, message: string, data?: object}>}
+     */
+    static async checkInTicket(uniqueCode, adminUserId) {
+        logger.info(`[TicketService] Attempting check-in for ticket ${uniqueCode} by admin ${adminUserId}`);
+        try {
+            const ticket = await prisma.ticket.findUnique({
+                where: { uniqueCode: uniqueCode, deletedAt: null }, // Ensure not soft-deleted
+                include: {
+                    event: { // Include event details for validation
+                        select: { id: true, name: true, startTime: true, status: true }
+                    }
+                }
+            });
+
+            if (!ticket) {
+                logger.warn(`[TicketService] Check-in failed: Ticket ${uniqueCode} not found.`);
+                return { success: false, status: 404, message: 'Ticket not found.' };
+            }
+
+            // 1. Validate Event Status (must be 'published' or similar active state)
+            //    Using 'published' as agreed. Adjust if your active status is different.
+            if (ticket.event.status !== 'published') {
+                logger.warn(`[TicketService] Check-in failed for ticket ${uniqueCode}: Event '${ticket.event.name}' status is '${ticket.event.status}', not 'published'.`);
+                return { success: false, status: 400, message: `Check-in failed: Event is not active (Status: ${ticket.event.status}).` };
+            }
+
+            // 2. Validate Check-in Time Window (1 hour before event starts)
+            const now = new Date();
+            const eventStartTime = new Date(ticket.event.startTime);
+            const checkinStartTime = new Date(eventStartTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+
+            if (now < checkinStartTime) {
+                logger.warn(`[TicketService] Check-in failed for ticket ${uniqueCode}: Check-in window not yet open (Event starts at ${eventStartTime.toISOString()}, Check-in starts at ${checkinStartTime.toISOString()}).`);
+                // Provide a user-friendly time format if possible
+                const options = { timeZone: 'asia/jakarta', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' };
+                const formattedCheckinStart = checkinStartTime.toLocaleString('id-ID', options);
+                return { success: false, status: 400, message: `Check-in belum dibuka. Check-in dapat dilakukan mulai ${formattedCheckinStart}. waktu ${options.timeZone}.` };
+            }
+
+            // 3. Validate Ticket Status (must not be already checked_in)
+            if (ticket.status === 'checked_in') {
+                logger.warn(`[TicketService] Check-in failed for ticket ${uniqueCode}: Already checked in at ${ticket.checkInTime?.toISOString()}.`);
+                return { success: false, status: 400, message: 'Check-in failed: Tiket ini sudah di check-in sebelumnya.' };
+            }
+
+            // All validations passed, proceed with update
+            const updatedTicket = await prisma.ticket.update({
+                where: { id: ticket.id }, // Use primary key for update
+                data: {
+                    status: 'checked_in',
+                    checkInTime: now,
+                    checkedInByUserId: adminUserId
+                },
+                select: { // Select fields needed for response/notification
+                    id: true,
+                    uniqueCode: true,
+                    status: true,
+                    checkInTime: true,
+                    checkedInByUserId: true,
+                    userId: true, // Needed for notification
+                    eventId: true // Needed for notification
+                }
+            });
+
+            logger.info(`[TicketService] Ticket ${uniqueCode} successfully checked in by admin ${adminUserId}.`);
+
+            // Create notification for the user (Optional but recommended)
+            try {
+                await prisma.notification.create({
+                    data: {
+                        userId: updatedTicket.userId,
+                        eventId: updatedTicket.eventId,
+                        type: 'checkin_success', // Ensure this type exists in your NotificationType enum
+                        message: `Tiket Anda (${updatedTicket.uniqueCode}) untuk event '${ticket.event.name}' berhasil di check-in.`,
+                        isRead: false,
+                    }
+                });
+                logger.info(`[TicketService] Check-in success notification created for user ${updatedTicket.userId} regarding ticket ${uniqueCode}.`);
+            } catch (notificationError) {
+                // Log the error but don't fail the check-in process itself
+                logger.error(`[TicketService] Failed to create check-in notification for ticket ${uniqueCode}: ${notificationError.message}`, { stack: notificationError.stack });
+            }
+
+            return {
+                success: true,
+                status: 200,
+                message: 'Ticket checked in successfully.',
+                data: {
+                    uniqueCode: updatedTicket.uniqueCode,
+                    status: updatedTicket.status,
+                    checkInTime: updatedTicket.checkInTime,
+                    checkedInByUserId: updatedTicket.checkedInByUserId
+                }
+            };
+
+        } catch (error) {
+            logger.error(`[TicketService] Error checking in ticket ${uniqueCode}: ${error.message}`, { stack: error.stack });
+            return { success: false, status: 500, message: 'Failed to check in ticket.' };
+        }
+    }
 }
 
 export default TicketService;

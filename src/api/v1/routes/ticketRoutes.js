@@ -1,9 +1,19 @@
 import express from 'express';
+import { param, validationResult } from 'express-validator'; // Import validation tools
 import TicketController from '../../../controllers/TicketController.js';
 import authMiddleware from '../../../middlewares/authMiddleware.js';
-import roleMiddleware from '../../../middlewares/roleMiddleware.js'; // Assuming roleMiddleware exists and works
+import roleMiddleware from '../../../middlewares/roleMiddleware.js';
+// import { handleValidationErrors } from '../../../middlewares/errorMiddleware.js'; // Import validation error handler
+import { handleMulterError } from '../../../middlewares/errorMiddleware.js'; // Corrected path
 
 const router = express.Router();
+
+// Validation middleware for uniqueCode parameter
+const validateUniqueCode = [
+    param('uniqueCode').notEmpty().withMessage('Ticket unique code is required.'),
+    // handleValidationErrors // Use the centralized handler
+    handleMulterError
+];
 
 // GET /api/v1/tickets/paid - Get all paid tickets (Admin only)
 router.get(
@@ -20,6 +30,22 @@ router.get(
     TicketController.listMyPaidTickets
 );
 
-// Add other ticket-related routes here if needed (e.g., get specific ticket, check-in)
+// GET /api/v1/tickets/:uniqueCode - Get specific ticket details (Owner or Admin)
+router.get(
+    '/:uniqueCode',
+    authMiddleware, // Ensure user is logged in
+    validateUniqueCode, // Validate the uniqueCode parameter
+    TicketController.getTicketByCode
+);
+
+// POST /api/v1/tickets/:uniqueCode/checkin - Check-in a ticket (Admin only)
+router.post(
+    '/:uniqueCode/checkin',
+    authMiddleware,
+    roleMiddleware(['admin']), // Ensure only admins can access
+    validateUniqueCode, // Validate the uniqueCode parameter
+    TicketController.checkInTicket
+);
+
 
 export default router;
