@@ -1,894 +1,873 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {},
-        "title": "event-app",
-        "version": "1.0.0"
+        "title": "Event App API",
+        "description": "API documentation for the Event Management Application backend.",
+        "version": "1.0.0",
+        "contact": {}
     },
-    "host": "localhost",
-    "basePath": "/",
+    "host": "localhost:3000",
+    "basePath": "/api/v1",
     "schemes": [
         "http"
     ],
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
+        }
+    },
     "paths": {
-        "/api/v1/auth/login": {
+        "/auth/register": {
             "post": {
-                "consumes": [
-                    "text/plain"
-                ],
+                "tags": ["Authentication"],
+                "summary": "Register a new user",
+                "description": "Registers a new user with name, email, password, and phone number.",
+                "operationId": "registerUser",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
+                        "description": "User registration details",
+                        "required": true,
                         "schema": {
-                            "format": "binary",
-                            "type": "string"
+                            "$ref": "#/definitions/RegisterUserInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "login",
-                "operationId": "login",
-                "summary": "login"
+                    "201": { "description": "User registered successfully" },
+                    "400": { "description": "Validation error or email already exists" },
+                    "500": { "description": "Internal server error" }
+                }
             }
         },
-        "/api/v1/auth/logout": {
+        "/auth/login": {
             "post": {
-                "consumes": [
-                    "text/plain"
-                ],
+                "tags": ["Authentication"],
+                "summary": "Login a user",
+                "description": "Authenticates a user with email and password, returns a JWT.",
+                "operationId": "loginUser",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
+                        "description": "User login credentials",
+                        "required": true,
                         "schema": {
-                            "format": "binary",
-                            "type": "string"
+                            "$ref": "#/definitions/LoginInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "logout",
-                "operationId": "logout",
-                "summary": "logout"
+                    "200": { "description": "Login successful, returns token" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Invalid credentials or user inactive/deleted" },
+                    "500": { "description": "Internal server error" }
+                }
             }
         },
-        "/api/v1/auth/register": {
-            "post": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "register",
-                "operationId": "register",
-                "summary": "register"
-            }
-        },
-        "/api/v1/events": {
+        "/users": {
             "get": {
-                "consumes": [
-                    "text/plain"
-                ],
+                "tags": ["Users"],
+                "summary": "Get list of users (Admin)",
+                "description": "Retrieves a paginated list of users. Requires admin privileges.",
+                "operationId": "getUsers",
+                "produces": ["application/json"],
                 "parameters": [
-                    {
-                        "in": "query",
-                        "name": "category",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "search",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "status",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "page",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "limit",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "order",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "sort",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "date",
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
+                     { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                     { "in": "query", "name": "limit", "type": "integer", "default": 10 }
                 ],
+                "security": [{ "BearerAuth": [] }],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "events",
-                "operationId": "events",
-                "summary": "events"
+                    "200": { "description": "List of users retrieved" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "500": { "description": "Internal server error" }
+                }
             }
         },
-        "/api/v1/events/": {
-            "post": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
+        "/users/profile": {
+             "get": {
+                "tags": ["Users"],
+                "summary": "Get current user's profile",
+                "description": "Retrieves the profile information of the currently logged-in user.",
+                "operationId": "getUserProfile",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Buat Event",
-                "operationId": "buatEvent",
-                "summary": "Buat Event"
-            }
-        },
-        "/api/v1/events/11": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "properties": {
-                                "capacity": {
-                                    "example": 500,
-                                    "type": "number"
-                                },
-                                "category": {
-                                    "example": "Fotografi",
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "example": "Menampilkan karya-karya indah fotografer alam Indonesia.",
-                                    "type": "string"
-                                },
-                                "endTime": {
-                                    "example": "2025-10-07T18:00:00+07:00",
-                                    "type": "string"
-                                },
-                                "location": {
-                                    "example": "Galeri Seni Nasional",
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "example": "Pameran Fotografi Alam",
-                                    "type": "string"
-                                },
-                                "posterImageUrl": {
-                                    "example": "https://contoh.com/images/pameran-foto.jpg",
-                                    "type": "string"
-                                },
-                                "startTime": {
-                                    "example": "2025-10-01T10:00:00+07:00",
-                                    "type": "string"
-                                },
-                                "status": {
-                                    "example": "cancelled",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "events",
-                "operationId": "events1",
-                "summary": "events"
-            }
-        },
-        "/api/v1/events/17": {
-            "delete": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Events By ID",
-                "operationId": "eventsById1",
-                "summary": "Events By ID"
+                    "200": { "description": "User profile retrieved" },
+                    "401": { "description": "Unauthorized" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
             },
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
+             "put": {
+                "tags": ["Users"],
+                "summary": "Update current user's profile",
+                "description": "Updates the profile information (name, phone, password) of the logged-in user.",
+                "operationId": "updateUserProfile",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
+                        "description": "User profile update details",
+                        "required": true,
                         "schema": {
-                            "format": "binary",
-                            "type": "string"
+                            "$ref": "#/definitions/UpdateProfileInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Events By ID",
-                "operationId": "eventsById",
-                "summary": "Events By ID"
+                    "200": { "description": "Profile updated successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
             }
         },
-        "/api/v1/events/17/ticket-types": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
+         "/users/{userId}": {
+             "put": {
+                "tags": ["Users"],
+                "summary": "Update user details (Admin)",
+                "description": "Updates details (name, email, phone, role, password) for a specific user. Requires admin privileges.",
+                "operationId": "adminUpdateUser",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                 "parameters": [
+                     { "in": "path", "name": "userId", "required": true, "type": "integer" },
                     {
                         "in": "body",
                         "name": "body",
+                        "description": "User update details",
+                        "required": true,
                         "schema": {
-                            "properties": {
-                                "name": {
-                                    "example": "VVIPP",
-                                    "type": "string"
-                                },
-                                "price": {
-                                    "example": 5000000,
-                                    "type": "number"
-                                },
-                                "quantity": {
-                                    "example": 5,
-                                    "type": "number"
-                                },
-                                "saleEndDate": {
-                                    "example": "2025-11-30T23:59:59.000Z",
-                                    "type": "string"
-                                },
-                                "saleStartDate": {
-                                    "example": "2025-10-01T10:00:00.000Z",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
+                            "$ref": "#/definitions/AdminUpdateUserInput"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "ticket-types",
-                "operationId": "ticketTypes",
-                "summary": "ticket-types"
-            }
-        },
-        "/api/v1/events/17/ticket-types/11": {
-            "delete": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "ticket-types",
-                "operationId": "ticketTypes2",
-                "summary": "ticket-types"
-            }
-        },
-        "/api/v1/events/17/ticket-types/2": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "properties": {
-                                "name": {
-                                    "example": "Reguler",
-                                    "type": "string"
-                                },
-                                "price": {
-                                    "example": 500000,
-                                    "type": "number"
-                                },
-                                "quantity": {
-                                    "example": 500,
-                                    "type": "number"
-                                },
-                                "saleEndDate": {
-                                    "example": "2025-11-30T23:59:59.000Z",
-                                    "type": "string"
-                                },
-                                "saleStartDate": {
-                                    "example": "2025-10-01T10:00:00.000Z",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "ticket-types",
-                "operationId": "ticketTypes1",
-                "summary": "ticket-types"
-            }
-        },
-        "/api/v1/orders": {
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "page",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "limit",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "status",
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Order By UserID",
-                "operationId": "orderByUserid",
-                "summary": "Order By UserID"
+                    "200": { "description": "User updated successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
             },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "properties": {
-                                "items": {
-                                    "example": [
-                                        {
-                                            "ticketTypeId": 1
-                                        }
-                                    ],
-                                    "items": {
-                                        "properties": {
-                                            "ticketTypeId": {
-                                                "example": 1,
-                                                "type": "number"
-                                            }
-                                        },
-                                        "type": "object"
-                                    },
-                                    "type": "array"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Order",
-                "operationId": "order",
-                "summary": "Order"
-            }
-        },
-        "/api/v1/orders/all": {
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "page",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "limit",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "status",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "sortBy",
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "sortOrder",
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "All Order",
-                "operationId": "allOrder",
-                "summary": "All Order"
-            }
-        },
-        "/api/v1/orders/{orderCode}": {
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "orderCode",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Order by OrderID",
-                "operationId": "orderByOrderid",
-                "summary": "Order by OrderID"
-            }
-        },
-        "/api/v1/orders/{orderCode}/cancel": {
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "orderCode",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "post": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Cancel Order by OrderID",
-                "operationId": "cancelOrderByOrderid",
-                "summary": "Cancel Order by OrderID"
-            }
-        },
-        "/api/v1/orders/{orderCode}/checkout-manual": {
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "orderCode",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "properties": {
-                                "paymentAmount": {
-                                    "example": 1000000,
-                                    "type": "number"
-                                },
-                                "paymentDate": {
-                                    "example": "2023-02-20",
-                                    "type": "string"
-                                },
-                                "paymentMethod": {
-                                    "example": "cash",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Payment",
-                "operationId": "payment",
-                "summary": "Payment"
-            }
-        },
-        "/api/v1/tickets/my": {
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Ticket By UserID",
-                "operationId": "ticketByUserid",
-                "summary": "Ticket By UserID"
-            }
-        },
-        "/api/v1/tickets/paid": {
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Ticket ALL admin",
-                "operationId": "ticketAllAdmin",
-                "summary": "Ticket ALL admin"
-            }
-        },
-        "/api/v1/tickets/{ticketTest}": {
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "ticketTest",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Ticket By ID",
-                "operationId": "ticketById",
-                "summary": "Ticket By ID"
-            }
-        },
-        "/api/v1/tickets/{ticketTest}/checkin": {
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "ticketTest",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "post": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Check in ticket",
-                "operationId": "checkInTicket",
-                "summary": "Check in ticket"
-            }
-        },
-        "/api/v1/users": {
-            "get": {
-                "consumes": [
-                    "text/plain"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "format": "binary",
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "getUser",
-                "operationId": "getuser",
-                "summary": "getUser"
-            }
-        },
-        "/api/v1/users/2": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "schema": {
-                            "properties": {
-                                "email": {
-                                    "example": "user@mail.com",
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "example": "user",
-                                    "type": "string"
-                                },
-                                "password": {
-                                    "example": "12345678",
-                                    "type": "string"
-                                },
-                                "phone_number": {
-                                    "example": "01823264",
-                                    "type": "string"
-                                },
-                                "role": {
-                                    "example": "halo",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Edit User",
-                "operationId": "editUser",
-                "summary": "Edit User"
-            }
-        },
-        "/api/v1/users/5": {
             "delete": {
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "Delete user",
+                "tags": ["Users"],
+                "summary": "Soft delete a user (Admin)",
+                "description": "Marks a user as deleted (soft delete). Requires admin privileges.",
                 "operationId": "deleteUser",
-                "summary": "Delete user"
-            }
-        },
-        "/api/v1/users/activate/2": {
-            "patch": {
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "description": "activate user",
-                "operationId": "activateUser",
-                "summary": "activate user"
-            }
-        },
-        "/api/v1/users/change-role/2": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
                 "parameters": [
+                    { "in": "path", "name": "userId", "required": true, "type": "integer" }
+                ],
+                "responses": {
+                    "200": { "description": "User soft-deleted successfully" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/users/activate/{userId}": {
+            "patch": {
+                "tags": ["Users"],
+                "summary": "Activate a user (Admin)",
+                "description": "Sets a user's status to active. Requires admin privileges.",
+                "operationId": "activateUser",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "userId", "required": true, "type": "integer" }
+                ],
+                "responses": {
+                    "200": { "description": "User activated successfully" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/users/change-role/{userId}": {
+             "put": {
+                "tags": ["Users"],
+                "summary": "Change user role (Admin)",
+                "description": "Changes the role of a specific user. Requires admin privileges.",
+                "operationId": "changeUserRole",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                 "parameters": [
+                     { "in": "path", "name": "userId", "required": true, "type": "integer" },
                     {
                         "in": "body",
                         "name": "body",
+                        "description": "New role for the user",
+                        "required": true,
                         "schema": {
+                            "type": "object",
+                            "required": ["role"],
                             "properties": {
-                                "role": {
-                                    "example": "user",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
+                                "role": { "type": "string", "example": "admin" }
+                            }
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": ""
+                    "200": { "description": "User role changed successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/files/avatar": {
+            "post": {
+                "tags": ["Files"],
+                "summary": "Upload user avatar",
+                "description": "Uploads an avatar image for the logged-in user.",
+                "operationId": "uploadAvatar",
+                "consumes": ["multipart/form-data"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "avatar",
+                        "type": "file",
+                        "required": true,
+                        "description": "The avatar image file (jpg, png, gif)."
                     }
-                },
-                "description": "ChangeUser role",
-                "operationId": "changeuserRole",
-                "summary": "ChangeUser role"
+                ],
+                 "responses": {
+                    "200": { "description": "Avatar uploaded successfully" },
+                    "400": { "description": "Validation error (file type, size)" },
+                    "401": { "description": "Unauthorized" },
+                    "500": { "description": "Internal server error or file processing error" }
+                }
+            }
+        },
+        "/events": {
+            "get": {
+                "tags": ["Events"],
+                "summary": "List events",
+                "description": "Retrieves a list of events with filtering, sorting, and pagination.",
+                "operationId": "listEvents",
+                "produces": ["application/json"],
+                "parameters": [
+                    { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                    { "in": "query", "name": "limit", "type": "integer", "default": 10 },
+                    { "in": "query", "name": "search", "type": "string", "description": "Search term for event name or description" },
+                    { "in": "query", "name": "category", "type": "string" },
+                    { "in": "query", "name": "status", "type": "string", "enum": ["draft", "published", "cancelled", "completed"] },
+                    { "in": "query", "name": "date", "type": "string", "format": "date", "description": "Filter by specific date (YYYY-MM-DD)" },
+                    { "in": "query", "name": "sort", "type": "string", "enum": ["name", "startTime", "createdAt"], "default": "createdAt" },
+                    { "in": "query", "name": "order", "type": "string", "enum": ["asc", "desc"], "default": "desc" }
+                ],
+                "responses": {
+                    "200": { "description": "List of events retrieved" },
+                    "400": { "description": "Invalid query parameters" },
+                    "500": { "description": "Internal server error" }
+                }
+            },
+            "post": {
+                "tags": ["Events"],
+                "summary": "Create a new event (Admin)",
+                "description": "Creates a new event with associated ticket types. Requires admin privileges.",
+                "operationId": "createEvent",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Event and ticket type details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateEventInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "Event created successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/events/{eventId}": {
+             "get": {
+                "tags": ["Events"],
+                "summary": "Get event details by ID",
+                "description": "Retrieves details for a specific event, including its ticket types.",
+                "operationId": "getEventById",
+                "produces": ["application/json"],
+                "parameters": [
+                    { "in": "path", "name": "eventId", "required": true, "type": "integer" }
+                ],
+                "responses": {
+                    "200": { "description": "Event details retrieved" },
+                    "404": { "description": "Event not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            },
+            "put": {
+                "tags": ["Events"],
+                "summary": "Update an event (Admin)",
+                "description": "Updates details for a specific event. Requires admin privileges.",
+                "operationId": "updateEvent",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                     { "in": "path", "name": "eventId", "required": true, "type": "integer" },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Event update details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateEventInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Event updated successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Event not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            },
+            "delete": {
+                "tags": ["Events"],
+                "summary": "Soft delete an event (Admin)",
+                "description": "Marks an event and its associated ticket types as deleted. Requires admin privileges.",
+                "operationId": "deleteEvent",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "eventId", "required": true, "type": "integer" }
+                ],
+                "responses": {
+                    "200": { "description": "Event soft-deleted successfully" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Event not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/events/{eventId}/ticket-types": {
+            "post": {
+                "tags": ["Events"],
+                "summary": "Add a ticket type to an event (Admin)",
+                "description": "Adds a new ticket type to an existing event. Requires admin privileges.",
+                "operationId": "createTicketType",
+                 "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                     { "in": "path", "name": "eventId", "required": true, "type": "integer" },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Ticket type details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateTicketTypeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "Ticket type created successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Event not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/events/{eventId}/ticket-types/{ticketTypeId}": {
+             "put": {
+                "tags": ["Events"],
+                "summary": "Update a ticket type (Admin)",
+                "description": "Updates details for a specific ticket type. Requires admin privileges.",
+                "operationId": "updateTicketType",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                     { "in": "path", "name": "eventId", "required": true, "type": "integer" },
+                     { "in": "path", "name": "ticketTypeId", "required": true, "type": "integer" },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Ticket type update details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTicketTypeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Ticket type updated successfully" },
+                    "400": { "description": "Validation error" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Event or Ticket Type not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            },
+            "delete": {
+                "tags": ["Events"],
+                "summary": "Soft delete a ticket type (Admin)",
+                "description": "Marks a specific ticket type as deleted. Requires admin privileges.",
+                "operationId": "deleteTicketType",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "eventId", "required": true, "type": "integer" },
+                    { "in": "path", "name": "ticketTypeId", "required": true, "type": "integer" }
+                ],
+                "responses": {
+                    "200": { "description": "Ticket type soft-deleted successfully" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Event or Ticket Type not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "tags": ["Orders"],
+                "summary": "Get logged-in user's orders",
+                "description": "Retrieves a paginated list of orders placed by the currently logged-in user.",
+                "operationId": "getUserOrders",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                    { "in": "query", "name": "limit", "type": "integer", "default": 10 },
+                    { "in": "query", "name": "status", "type": "string", "enum": ["pending", "paid", "failed", "expired", "canceled"], "description": "Filter by payment status" }
+                ],
+                "responses": {
+                    "200": { "description": "List of user's orders retrieved" },
+                    "400": { "description": "Invalid query parameters" },
+                    "401": { "description": "Unauthorized" },
+                    "500": { "description": "Internal server error" }
+                }
+            },
+            "post": {
+                "tags": ["Orders"],
+                "summary": "Create a new order",
+                "description": "Creates a new order for the logged-in user based on selected ticket types.",
+                "operationId": "createOrder",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Order items (ticket type IDs)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateOrderInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "Order created successfully" },
+                    "400": { "description": "Validation error, ticket sold out, or purchase limit exceeded" },
+                    "401": { "description": "Unauthorized" },
+                    "404": { "description": "Ticket type not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/orders/all": {
+            "get": {
+                "tags": ["Orders"],
+                "summary": "Get all orders (Admin)",
+                "description": "Retrieves a paginated list of all orders in the system. Requires admin privileges.",
+                "operationId": "getAllOrders",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                 "parameters": [
+                    { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                    { "in": "query", "name": "limit", "type": "integer", "default": 10 },
+                    { "in": "query", "name": "status", "type": "string", "enum": ["pending", "paid", "failed", "expired", "canceled"], "description": "Filter by payment status" },
+                    { "in": "query", "name": "sortBy", "type": "string", "enum": ["orderedAt", "totalAmount"], "default": "orderedAt" },
+                    { "in": "query", "name": "sortOrder", "type": "string", "enum": ["asc", "desc"], "default": "desc" }
+                ],
+                "responses": {
+                    "200": { "description": "List of all orders retrieved" },
+                    "400": { "description": "Invalid query parameters" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/orders/{orderCode}": {
+            "get": {
+                "tags": ["Orders"],
+                "summary": "Get order details by code",
+                "description": "Retrieves details for a specific order using its unique code. Accessible by the order owner or admin.",
+                "operationId": "getOrderByCode",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "orderCode", "required": true, "type": "string" }
+                ],
+                "responses": {
+                    "200": { "description": "Order details retrieved" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Not owner or admin)" },
+                    "404": { "description": "Order not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/orders/{orderCode}/cancel": {
+            "post": {
+                "tags": ["Orders"],
+                "summary": "Cancel an order",
+                "description": "Cancels a 'pending' order. Accessible by the order owner or admin.",
+                "operationId": "cancelOrder",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "orderCode", "required": true, "type": "string" }
+                ],
+                "responses": {
+                    "200": { "description": "Order cancelled successfully" },
+                    "400": { "description": "Order cannot be cancelled (e.g., already paid)" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Not owner or admin)" },
+                    "404": { "description": "Order not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/orders/{orderCode}/checkout-manual": {
+            "post": {
+                "tags": ["Orders"],
+                "summary": "Simulate manual payment for an order",
+                "description": "Marks an order as 'paid' (manual simulation). Accessible by the order owner or admin.",
+                "operationId": "manualCheckout",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "path", "name": "orderCode", "required": true, "type": "string" },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Manual payment details (optional)",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/definitions/ManualCheckoutInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Manual checkout successful, tickets generated" },
+                    "400": { "description": "Order cannot be paid (e.g., not pending, amount mismatch)" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Not owner or admin)" },
+                    "404": { "description": "Order not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+         "/orders/payment-callback": {
+            "post": {
+                "tags": ["Orders"],
+                "summary": "Payment Gateway Callback (Placeholder)",
+                "description": "Endpoint for receiving payment gateway notifications (webhook). Logic needs implementation.",
+                "operationId": "paymentCallback",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                     {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Payload from payment gateway",
+                        "required": true,
+                        "schema": { "type": "object" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Callback received and processed (or queued)" },
+                    "400": { "description": "Invalid callback data or signature" },
+                    "500": { "description": "Internal server error processing callback" }
+                }
+            }
+        },
+        "/tickets/my": {
+            "get": {
+                "tags": ["Tickets"],
+                "summary": "Get logged-in user's paid tickets",
+                "description": "Retrieves a paginated list of paid tickets owned by the currently logged-in user.",
+                "operationId": "getMyPaidTickets",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                    { "in": "query", "name": "limit", "type": "integer", "default": 10 }
+                ],
+                "responses": {
+                    "200": { "description": "List of user's paid tickets retrieved" },
+                    "401": { "description": "Unauthorized" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/tickets/paid": {
+            "get": {
+                "tags": ["Tickets"],
+                "summary": "Get all paid tickets (Admin)",
+                "description": "Retrieves a paginated list of all paid tickets in the system. Requires admin privileges.",
+                "operationId": "getAllPaidTickets",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                 "parameters": [
+                    { "in": "query", "name": "page", "type": "integer", "default": 1 },
+                    { "in": "query", "name": "limit", "type": "integer", "default": 10 }
+                ],
+                "responses": {
+                    "200": { "description": "List of all paid tickets retrieved" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/tickets/{uniqueCode}": {
+            "get": {
+                "tags": ["Tickets"],
+                "summary": "Get ticket details by unique code",
+                "description": "Retrieves details for a specific ticket using its unique code. Accessible by the ticket owner or admin.",
+                "operationId": "getTicketByCode",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uniqueCode",
+                        "required": true,
+                        "type": "string",
+                        "description": "The unique code of the ticket"
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Ticket details retrieved successfully" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Not owner or admin)" },
+                    "404": { "description": "Ticket not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/tickets/{uniqueCode}/checkin": {
+            "post": {
+                "tags": ["Tickets"],
+                "summary": "Check in a ticket (Admin)",
+                "description": "Marks a specific ticket as checked-in. Requires admin privileges and validates event status and check-in time window.",
+                "operationId": "checkInTicket",
+                "produces": ["application/json"],
+                "security": [{ "BearerAuth": [] }],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uniqueCode",
+                        "required": true,
+                        "type": "string",
+                        "description": "The unique code of the ticket to check in"
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Ticket checked in successfully" },
+                    "400": { "description": "Check-in failed (e.g., already checked in, event not active, check-in window not open)" },
+                    "401": { "description": "Unauthorized" },
+                    "403": { "description": "Forbidden (Admin role required)" },
+                    "404": { "description": "Ticket not found" },
+                    "500": { "description": "Internal server error" }
+                }
+            }
+        },
+        "/metrics": {
+            "get": {
+                "tags": ["Miscellaneous"],
+                "summary": "Get application metrics",
+                "description": "Exposes application metrics in Prometheus format.",
+                "operationId": "getMetrics",
+                "produces": ["text/plain"],
+                "responses": {
+                    "200": { "description": "Prometheus metrics" },
+                    "500": { "description": "Internal server error" }
+                }
             }
         }
     },
-    "tags": []
+    "definitions": {
+        "RegisterUserInput": {
+            "type": "object",
+            "required": ["name", "email", "password", "phone_number"],
+            "properties": {
+                "name": { "type": "string", "example": "John Doe" },
+                "email": { "type": "string", "format": "email", "example": "john.doe@example.com" },
+                "password": { "type": "string", "format": "password", "example": "password123", "minLength": 8 },
+                "phone_number": { "type": "string", "example": "081234567890" }
+            }
+        },
+        "LoginInput": {
+            "type": "object",
+            "required": ["email", "password"],
+            "properties": {
+                "email": { "type": "string", "format": "email", "example": "john.doe@example.com" },
+                "password": { "type": "string", "format": "password", "example": "password123" }
+            }
+        },
+         "UpdateProfileInput": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string", "example": "Johnathan Doe" },
+                "phone_number": { "type": "string", "example": "089876543210" },
+                "password": { "type": "string", "format": "password", "description": "Provide only if changing password", "minLength": 8 }
+            }
+        },
+        "AdminUpdateUserInput": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string", "example": "Jane Doe Admin" },
+                "email": { "type": "string", "format": "email", "example": "jane.admin@example.com" },
+                "phone_number": { "type": "string", "example": "08111222333" },
+                "role": { "type": "string", "enum": ["user", "admin"], "example": "admin" },
+                 "password": { "type": "string", "format": "password", "description": "Provide only if changing password", "minLength": 8 }
+            }
+        },
+        "CreateEventInput": {
+            "type": "object",
+            "required": ["name", "description", "startTime", "endTime", "location", "capacity", "ticketTypes"],
+            "properties": {
+                "name": { "type": "string", "example": "Tech Conference 2025" },
+                "description": { "type": "string", "example": "Annual technology conference." },
+                "startTime": { "type": "string", "format": "date-time", "example": "2025-10-20T09:00:00Z" },
+                "endTime": { "type": "string", "format": "date-time", "example": "2025-10-21T17:00:00Z" },
+                "location": { "type": "string", "example": "Convention Center Hall A" },
+                "locationDetails": { "type": "string", "example": "Main entrance, 2nd floor" },
+                "posterImageUrl": { "type": "string", "format": "url", "example": "https://example.com/poster.jpg" },
+                "category": { "type": "string", "example": "Technology" },
+                "capacity": { "type": "integer", "format": "int32", "example": 1000 },
+                "status": { "type": "string", "enum": ["draft", "published"], "default": "draft" },
+                "ticketTypes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/definitions/CreateTicketTypeInput" }
+                }
+            }
+        },
+         "UpdateEventInput": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string", "example": "Tech Conference 2025 Updated" },
+                "description": { "type": "string", "example": "Updated annual technology conference details." },
+                "startTime": { "type": "string", "format": "date-time", "example": "2025-10-20T08:30:00Z" },
+                "endTime": { "type": "string", "format": "date-time", "example": "2025-10-21T17:30:00Z" },
+                "location": { "type": "string", "example": "Convention Center Hall B" },
+                "locationDetails": { "type": "string", "example": "Side entrance" },
+                "posterImageUrl": { "type": "string", "format": "url", "example": "https://example.com/poster_updated.jpg" },
+                "category": { "type": "string", "example": "Software Development" },
+                "capacity": { "type": "integer", "format": "int32", "example": 1200 },
+                "status": { "type": "string", "enum": ["draft", "published", "cancelled", "completed"], "example": "published" }
+            }
+        },
+        "CreateTicketTypeInput": {
+            "type": "object",
+            "required": ["name", "price", "quantity", "saleStartDate", "saleEndDate"],
+            "properties": {
+                 "name": { "type": "string", "example": "Early Bird" },
+                 "price": { "type": "number", "format": "float", "example": 50.00 },
+                 "quantity": { "type": "integer", "format": "int32", "example": 200 },
+                 "saleStartDate": { "type": "string", "format": "date-time", "example": "2025-08-01T00:00:00Z" },
+                 "saleEndDate": { "type": "string", "format": "date-time", "example": "2025-08-31T23:59:59Z" },
+                 "description": { "type": "string", "example": "Limited early bird tickets." },
+                 "quota": { "type": "integer", "format": "int32", "example": 200, "description": "Same as quantity, represents the total available." }
+            }
+        },
+        "UpdateTicketTypeInput": {
+             "type": "object",
+            "properties": {
+                 "name": { "type": "string", "example": "Regular Admission" },
+                 "price": { "type": "number", "format": "float", "example": 75.00 },
+                 "quantity": { "type": "integer", "format": "int32", "example": 500 },
+                 "saleStartDate": { "type": "string", "format": "date-time", "example": "2025-09-01T00:00:00Z" },
+                 "saleEndDate": { "type": "string", "format": "date-time", "example": "2025-10-19T23:59:59Z" },
+                 "description": { "type": "string", "example": "Standard admission ticket." },
+                 "quota": { "type": "integer", "format": "int32", "example": 500 }
+            }
+        },
+        "CreateOrderInput": {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "required": ["ticketTypeId"],
+                        "properties": {
+                            "ticketTypeId": { "type": "integer", "format": "int32", "example": 1 }
+                        }
+                    }
+                }
+            }
+        },
+        "ManualCheckoutInput": {
+            "type": "object",
+            "properties": {
+                "paymentMethod": { "type": "string", "example": "Manual Transfer Confirmation" },
+                "paymentAmount": { "type": "number", "format": "float", "description": "Optional: Amount confirmed manually" },
+                "paymentDate": { "type": "string", "format": "date-time", "description": "Optional: Time payment was confirmed" }
+            }
+        }
+    },
+    "tags": [
+        { "name": "Authentication", "description": "User registration and login" },
+        { "name": "Users", "description": "User profile and management" },
+        { "name": "Files", "description": "File uploads" },
+        { "name": "Events", "description": "Event and ticket type management" },
+        { "name": "Orders", "description": "Order creation and management" },
+        { "name": "Tickets", "description": "Ticket retrieval and check-in" },
+        { "name": "Miscellaneous", "description": "Other utility endpoints" }
+    ]
 }

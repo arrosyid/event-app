@@ -35,7 +35,7 @@ This project adheres to several key architectural patterns and practices:
     *   Order lifecycle management (pending, paid, canceled, etc.).
     *   Quota management for ticket types.
 *   **E-Ticket Generation:** Automatic generation of unique e-tickets (with placeholder QR codes) upon successful payment.
-*   **Check-in Validation (Under Development):** API endpoint planned for validating tickets via unique code (simulating QR code scan).
+*   **Ticket Details & Check-in:** Get specific ticket details via unique code (owner/admin). Admin can check-in tickets via unique code, with validation for event status ('published') and time window (1 hour before start).
 *   **File Uploads:** Handles user avatar uploads using Multer with validation.
 *   **Security:** JWT authentication, password hashing (PBKDF2 with salt), rate limiting, CORS configuration.
 *   **Input Validation:** Uses `express-validator` for robust request validation.
@@ -94,7 +94,7 @@ All API endpoints are versioned under `/api/v1`.
 *   `/api/v1/files`: File upload routes (e.g., avatars).
 *   `/api/v1/events`: Event management routes (CRUD for events, ticket types).
 *   `/api/v1/orders`: Order management routes (create order, list orders, get order details, cancel, checkout).
-*   `/api/v1/tickets`: Ticket management routes (validate check-in - *under development*).
+*   `/api/v1/tickets`: Ticket management routes (`GET /my` - User's paid tickets, `GET /paid` - Admin: all paid tickets, `GET /:uniqueCode` - Owner/Admin: specific ticket details, `POST /:uniqueCode/checkin` - Admin: check-in ticket).
 *   `/api/v1/metrics`: Exposes Prometheus metrics.
 *   `/api/v1/`: Miscellaneous routes (e.g., health check - if implemented).
 
