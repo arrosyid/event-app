@@ -4,6 +4,7 @@ import { promisify } from 'util';
 // Redis connection setup
 const redis = new Redis({
     host: process.env.REDIS_HOST || 'localhost', // Use environment variables if available
+    password: process.env.REDIS_PASSWORD || null,
     port: process.env.REDIS_PORT || 6379,
     db: process.env.REDIS_DB || 0
 });
