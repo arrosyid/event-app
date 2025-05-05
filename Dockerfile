@@ -51,6 +51,8 @@ EXPOSE 3000
 
 # Create logs directory and set permissions before switching user
 RUN mkdir logs && chown node:node logs
+RUN mkdir uploads && chown node:node uploads
+
 
 # Switch to a non-root user for security
 USER node
