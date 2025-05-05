@@ -27,6 +27,7 @@ const uploadsPath = path.join(projectRoot, 'uploads');
 const app = express();
 const httpServer = http.createServer(app);
 
+app.set('trust proxy', true);
 // --- Global Middleware ---
 app.use(corsMiddleware); // Apply CORS
 app.use(rateLimiter); // Apply rate limiting
