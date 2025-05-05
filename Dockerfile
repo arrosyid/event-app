@@ -49,6 +49,9 @@ COPY src ./src
 # Expose the port the app runs on
 EXPOSE 3000
 
+# Create logs directory and set permissions before switching user
+RUN mkdir logs && chown node:node logs
+
 # Switch to a non-root user for security
 USER node
 
