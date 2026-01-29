@@ -47,8 +47,8 @@ class AuthService {
 
             // Generate JWT token
             const payload = {
-                id: user.id,
-                role: user.role,
+                sub : user.id,
+                
             };
             const token = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiresIn });
 

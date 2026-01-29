@@ -7,8 +7,8 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
     if (!token) {
-        logger.warn('Authentication attempt failed: No token provided.', { path: req.path });
-        return res.status(401).json({ message: 'Unauthorized: No token provided' });
+        logger.warn('user unauthenticated try to access protected route.', { path: req.path });
+        return  res.status(401).json({ message: 'Unauthorized: Authentication required to access this resource.' });
     }
 
     try {
@@ -18,11 +18,12 @@ const authMiddleware = (req, res, next) => {
         logger.info(`User authenticated: ${req.user.id} (Role: ${req.user.role})`, { path: req.path });
         next();
     } catch (err) {
-        logger.error('Authentication failed: Invalid token.', { error: err.message, path: req.path });
-        if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: 'Unauthorized: Token expired' });
-        }
-        return res.status(403).json({ message: 'Forbidden: Invalid token' });
+        // if (err.name === 'TokenExpiredError') {
+        //     logger.error('Authentication failed: Token expired.', { error: err.message, path: req.path, user: req.user });
+        //     return res.status(401).json({ message: 'Unauthorized: Token expired' });
+        // }
+        logger.error('Authentication failed: Invalid or expired token.', { error: err.message, path: req.path });
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
 };
 

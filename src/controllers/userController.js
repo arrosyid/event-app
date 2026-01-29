@@ -61,10 +61,8 @@ class UserController {
     async getUsers(req, res, next) {
         try {
             // req.user is populated by authMiddleware
-            const requestingUserId = req.user.id;
-            const requestingUserRole = req.user.role;
-
-            const result = await UserService.getUsers(requestingUserId, requestingUserRole);
+            const requestingUserId = req.user.sub;
+            const result = await UserService.getUsers(requestingUserId);
 
             if (result.success) {
                 res.status(200).json({

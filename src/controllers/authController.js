@@ -34,6 +34,7 @@ class AuthController {
         try {
             // 2. Call AuthService to attempt login
             const result = await AuthService.login(email, password);
+            logger.info('AuthService login result:', { result });
 
             // 3. Send response based on service result
             if (result.success) {
@@ -50,6 +51,7 @@ class AuthController {
                     message: result.message
                 });
             }
+
         } catch (error) {
             logger.error('Unexpected error in AuthController login:', { error: error.message, stack: error.stack });
             next(error);

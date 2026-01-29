@@ -15,19 +15,26 @@ class UserService {
      * @param {string} requestingUserRole - The role of the user making the request.
      * @returns {Promise<object>} - Contains success status, data (user or users), and message.
      */
-    async getUsers(requestingUserId, requestingUserRole) {
+    async getUsers(requestingUserId) {
         try {
             // Select fields excluding password, salt, and deletedAt (unless needed for admin view)
             const selectFields = { id: true, name: true, email: true, role: true, is_active: true, avatar: true, created_at: true, updated_at: true };
 
-            if (requestingUserRole.toLowerCase() === 'admin') {
-                const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
-                const USER_CACHE_TTL = 60; // Define TTL locally
-                let cachedUsers = await getAsync(ALL_USERS_CACHE_KEY);
-                if (cachedUsers) {
-                    logger.info('Cache hit for all users.');
-                    return { success: true, data: JSON.parse(cachedUsers) };
-                }
+            const { role } = await prisma.user.findUnique({
+                where: { id: requestingUserId },
+                select: { role: true }
+            });
+
+            if (role === 'admin') {
+                // caching logic for all users
+                // const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
+                // const USER_CACHE_TTL = 60; // Define TTL locally
+                // let cachedUsers = await getAsync(ALL_USERS_CACHE_KEY);
+
+                // if (cachedUsers) {
+                //     logger.info('Cache hit for all users.');
+                //     return { success: true, data: JSON.parse(cachedUsers) };
+                // }
 
                 logger.info('Cache miss for all active users. Fetching from DB.');
                 // Fetch only active users
@@ -35,7 +42,7 @@ class UserService {
                     where: { deletedAt: null }, // Filter out soft-deleted users
                     select: selectFields
                 });
-                await setAsync(ALL_USERS_CACHE_KEY, USER_CACHE_TTL, JSON.stringify(users));
+                // await setAsync(ALL_USERS_CACHE_KEY, USER_CACHE_TTL, JSON.stringify(users));
                 return { success: true, data: users };
 
             } else {
@@ -51,7 +58,7 @@ class UserService {
                 return { success: true, data: user };
             }
         } catch (error) {
-            logger.error('Error fetching users:', { error: error.message, userId: requestingUserId, role: requestingUserRole });
+            logger.error('Error fetching users:', { error: error.message, userId: requestingUserId });
             return { success: false, status: 500, message: 'Internal server error fetching users' };
         }
     }
@@ -108,9 +115,9 @@ class UserService {
 
             logger.info(`User updated successfully: ${userId}`);
             // Invalidate caches
-            const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
-            await delAsync(ALL_USERS_CACHE_KEY);
-            await delAsync(`user:${userId}`);
+            // const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
+            // await delAsync(ALL_USERS_CACHE_KEY);
+            // await delAsync(`user:${userId}`);
 
             return { success: true, data: updatedUser };
 
@@ -143,9 +150,9 @@ class UserService {
 
             logger.info(`Active user role changed successfully: ${userId} to ${role}`);
             // Invalidate caches
-            const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
-            await delAsync(ALL_USERS_CACHE_KEY);
-            await delAsync(`user:${userId}`);
+            // const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
+            // await delAsync(ALL_USERS_CACHE_KEY);
+            // await delAsync(`user:${userId}`);
 
             return { success: true, message: 'User role changed successfully' };
 
@@ -177,9 +184,9 @@ class UserService {
 
             logger.info(`Active user activated successfully: ${userId}`);
             // Invalidate caches
-            const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
-            await delAsync(ALL_USERS_CACHE_KEY);
-            await delAsync(`user:${userId}`);
+            // const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
+            // await delAsync(ALL_USERS_CACHE_KEY);
+            // await delAsync(`user:${userId}`);
 
             return { success: true, message: 'User activated successfully' };
 
@@ -211,9 +218,9 @@ class UserService {
 
             logger.info(`User soft-deleted successfully: ${userId}`);
             // Invalidate caches
-            const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
-            await delAsync(ALL_USERS_CACHE_KEY);
-            await delAsync(`user:${userId}`); // Invalidate specific user cache if exists
+            // const ALL_USERS_CACHE_KEY = 'users:all'; // Define cache key locally
+            // await delAsync(ALL_USERS_CACHE_KEY);
+            // await delAsync(`user:${userId}`); // Invalidate specific user cache if exists
 
             return { success: true, message: 'User deleted successfully' };
 
