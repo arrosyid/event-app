@@ -1,5 +1,5 @@
 import prisma from '../models/prisma.js'; // Adjusted path
-import { getAsync, setAsync, delAsync } from '../config/redis.js';
+// import { getAsync, setAsync, delAsync } from '../config/redis.js';
 import { logger } from '../config/logger.js';
 import { hashPassword } from '../utils/passwordUtils.js'; // Import centralized function
 

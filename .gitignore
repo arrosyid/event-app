@@ -46,3 +46,4 @@ coverage/
 *.conf
 
 .clinerules/
+.scannerwork/
